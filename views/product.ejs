@@ -1,0 +1,175 @@
+<!doctype html>
+<html>
+<head>
+	<title>User Authentication</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+	<style>
+		body 		{ padding-top:80px; }
+	</style>
+	
+	
+</head>
+<body>
+
+<div class="container">
+<span class="label label-danger"><%=message%></span>
+<div class="col-sm-3 col-sm-offset-3">
+
+	<h1><span class="fa fa-sign-in"></span> Update Product Information</h1>
+	
+	<form action="/updateProduct" method="post">
+	
+		<div class="form-group">
+		
+<label>Select Product</label>
+<select class="form-control" name="updateProduct">
+<% for(var i=0; i<products.length; i++) {
+if(products[i].ProductName==selected){ %>
+<option value=<%=products[i].ProductName%> selected><%=products[i].ProductName%></option>
+<% }
+else
+{%>
+<option value=<%=products[i].ProductName%>><%=products[i].ProductName%></option>
+
+	<% }} %>
+</select>
+			
+		</div>
+
+<div class="form-group">
+		
+<label>Select an attribute to change</label>
+<select class="form-control" name="updateAttribute" id="attribute" onchange="change()"> 
+<option value="ProductName">Product Name</option>
+<option value="ProductCondition">Product Condition</option>
+<option value="ProductDetails" selected>Product Details</option>
+<option value="ProductCost">Product Cost</option>
+<option value="Category">Category</option>
+<option value="AvailableQuantity">Available Quantity</option>
+
+</select>
+			
+</div>
+		
+<div class="form-group">
+<label>Please write the new value here : </label>
+<input type="text" name="updateValue"></input>	
+</div>
+
+		<button type="submit" class="btn btn-warning btn-sm">Update</button>
+	</form>
+	
+
+</div>
+
+
+
+
+<div class="col-sm-3 col-sm-offset-3">
+
+	<h1><span class="fa fa-sign-in"></span> Create new Product</h1>
+	
+	<form action="/createProduct" method="post">
+
+<div class="form-group">
+<label>Product Id * : </label>
+<input type="text" name="ProductId"></input>	
+</div>	
+	
+<div class="form-group">
+<label>Product Name * : </label>
+<input type="text" name="ProductName"></input>	
+</div>
+
+<div class="form-group">
+<label>Product Condition : </label>
+<input type="text" name="ProductCondition"></input>	
+</div>
+
+<div class="form-group">
+<label>Product Details : </label>
+<input type="text" name="ProductDetails"></input>	
+</div>
+
+<div class="form-group">
+<label>Product Cost* : </label>
+<input type="text" name="ProductCost"></input>	
+</div>
+
+<div class="form-group">
+<label>Category : </label>
+<input type="text" name="Category"></input>	
+</div>
+
+<div class="form-group">
+<label>Available Quantity : </label>
+<input type="text" name="AvailableQuantity"></input>	
+</div>
+
+<div class="form-group">
+<label>Seller Membership No. : </label>
+<input type="text" name="SellerMembershipNo"></input>	
+</div>
+
+<label>Will the given product be used for auction?</label>
+<select class="form-control" name="IsAuction" id="IsAuction" onchange="change2()">
+<option value="Yes" selected>Yes</option>
+<option value="No">No</option>
+</select>
+
+<div class="form-group">
+<label>Enter Bid Start Time: </label>
+<input type="text" name="BidStartTime" id="t1"></input>	
+</div>
+
+<div class="form-group">
+<label>Enter Bid Start Time: </label>
+<input type="text" name="BidEndTime" id="t2"></input>	
+</div>
+
+<button type="submit" class="btn btn-warning btn-sm">Create</button>
+	</form>
+	
+
+</div>
+
+
+</div>
+</body>
+<script>
+function change2()
+{
+   
+	var sel=document.getElementById("IsAuction");
+	var a = sel.options[sel.selectedIndex].value;
+	if(a=="No")
+	{
+	document.getElementById("t1").disabled=true;
+	document.getElementById("t2").disabled=true;
+	}
+	else
+	{
+	document.getElementById("t1").disabled=false;
+	document.getElementById("t2").disabled=false;
+	}
+	
+	
+	//document.getElementById("p1").innerHTML="message=";//"The original value of the selected product :"+b; 
+	
+	//window.location="http://localhost:3009/viewCategory/"+a;
+
+}
+
+function change()
+{
+   
+	var sel=document.getElementById("attribute");
+	var a = sel.options[sel.selectedIndex].value;
+	
+	//document.getElementById("p1").innerHTML="message=";//"The original value of the selected product :"+b; 
+	
+	//window.location="http://localhost:3009/viewCategory/"+a;
+
+}
+</script>
+</html>

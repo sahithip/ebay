@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+	<title>Display Customer and sellers</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+	<style>
+		body 		{ padding-top:80px; }
+	</style>
+	
+	
+</head>
+<body>
+
+<div class="container">
+<span class="label label-danger"><%=message%></span>
+<div class="col-sm-3 col-sm-offset-3">
+
+<h1><span class="fa fa-sign-in"></span> Customers Info</h1>
+	
+
+<div class="form-group">
+		
+
+<ol>
+<% for(var i=0; i<customers.length; i++) {
+ %>
+<li><%=customers[i].EmailId%> </li>
+<% } %>
+</ol>
+</div>
+</form>
+	
+
+</div>
+
+</div>
+
+</body>
+</html>

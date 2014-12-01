@@ -1,0 +1,195 @@
+<html>
+<head>
+    <title>
+        My eBay&nbsp;Summary</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=EDGE">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="description" content="eBay Application">
+    <meta name="author" content="eBay: Apps">
+    <meta name="viewport" id="viewportMeta" content="width=1200"><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link href="/css/extr.css" type="text/css" rel="stylesheet">
+    <link href="/css/logo.css" type="text/css" rel="stylesheet">
+    <link href="/css/prof.css" type="text/css" rel="stylesheet">
+    <style>
+        .my-ebay p.menu-head {
+            padding-left: 15px;
+        }
+        .form-horizontal .form-group {
+            max-height: 40px;
+        }
+    </style>
+</head>
+<body class="summary-ui  lang-en site-id-0 geo-id-0 time-left-col  sz1200">
+<!--  Global Header -->
+<div id="header" style="margin-top: 30px; position: relative;">
+    <div style="position: absolute; right: 0; top: -20px; font-size: 0.9em">
+        Hi <strong><%=user.FirstName%>!</strong> <small style="margin-left: 10px; font-size: 0.9em;">Not <%=user.FirstName%>? <a href="/logout">Logout</a></small>
+    </div>
+    <table class="gh-tbl">
+        <tbody>
+        <tr>
+            <td class="gh-td">
+                <!--[if lt IE 9]><a href="http://www.ebay.com/" class="iclg" _sp="m570.l2586" id="gh-la">eBay
+                    <img width="117" height="120" style="clip:rect(47px, 118px, 95px, 0px); position:absolute; top:-47px;left:0" alt="" src="http://ir.ebaystatic.com/rs/v/apstidvcvu5pxlbxkphrrdo5iqv.png" id="gh-logo"></a><![endif]-->
+                <!--[if (gte IE 9)|!(IE)]><!--><a href="http://www.ebay.com/" class="iclg" _sp="m570.l2586" id="gh-la">eBay<img width="250" height="200" style="clip:rect(47px, 118px, 95px, 0px); position:absolute; top:-47px;left:0" alt="" src="http://ir.ebaystatic.com/rs/v/fxxj3ttftm5ltcqnto1o4baovyl.png" id="gh-logo"></a><!--<![endif]-->
+            </td>
+            <td class="gh-td">
+                <div id="gh-shop">
+                </div>
+            </td>
+            <td class="gh-td-s">
+                <form id="gh-f" method="get" action="/search">
+                    <table class="gh-tbl2">
+                        <tbody>
+                        <tr>
+                            <td class="gh-td-s">
+                                <div id="gh-ac-box">
+                                    <div id="gh-ac-box2">
+                                        <label for="gh-ac" class="gh-hdn g-hdn">
+                                            Enter your search keyword
+                                        </label>
+                                        <input type="text" class="gh-tb ui-autocomplete-input" size="50" maxlength="300"
+                                               placeholder="Search..." id="gh-ac" name="q" autocapitalize="off" autocorrect="off"
+                                               spellcheck="false" autocomplete="off">
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="gh-td" id="gh-cat-td">
+                                <div id="gh-cat-box">
+                                    <select title="Select a category for search" class="gh-sb gh-sprRetina" size="1" id="gh-cat" name="category">
+                                        <option selected="selected" value="0">All Categories</option>
+                                        <!-- EJS logic to enumerate all categories -->
+                                        <option value="20081">Antiques</option>
+                                    </select>
+                                </div>
+                            </td>
+                            <td class="gh-td">
+                                <input type="submit" class="btn btn-prim gh-spr" id="gh-btn" value="Search">
+                            </td>
+                            <td class="gh-td" id="gh-as-td">
+                                <div id="gh-as">
+
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<!-- my-ebay Page content here -->
+
+<div id="my-ebay" class="my-ebay">
+    <div class="me-rtm topRtm">
+        <!-- FOR US/UK/DE -->
+        <div id="rtm_html_644" style="min-height: 30px;"></div>
+        <!-- FOR CA/AUS -->
+    </div>
+    <a id="mainContent" name="mainContent" tabindex="-1"></a>
+    <div id="top-nav">
+        <div class="tabbable">
+            <ul class="nav nav-tabs-p" role="navigation">
+                <li class="tab active">
+                    <a href="/bids/current">Activity</a>
+                </li>
+                <li class="tab">
+                    <a href="/browse">Browse</a>
+                </li>
+                <li class="tab">
+                    <a href="/account">Account</a>
+                </li>
+            </ul>
+        </div>
+        <div class="tabbable-bottom"></div>
+    </div>
+    <div id="domain-nav">
+        <div class="menu-list" role="navigation">
+            <p class="menu-head selected">Update Product</p>
+        </div>
+    </div>
+    <div id="main-content">
+        <%if (message) { %>
+        <div class="alert alert-<%=mclass%>"><%=message%></div>
+        <% } %>
+        <form action="/products/update" method="post" class="form-horizontal" style="margin-left: 40px;">
+            <input type="hidden" value="<%-product['ProductId']%>" name="p"/>
+            <div class="form-group">
+                <label class="control-label col-xs-2">Product Name * : </label>
+                <div class="col-xs-6">
+                    <input class="form-control" type="text" name="ProductName" value="<%-product['ProductName']%>">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-2">Product Condition : </label>
+                <div class="col-xs-6">
+                    <input class="form-control" type="text" name="ProductCondition" value="<%-product['ProductCondition']%>">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-2">Product Details : </label>
+                <div class="col-xs-6">
+                    <input class="form-control" type="text" name="ProductDetails" value="<%-product['ProductDetails']%>">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-2">Product Cost* : </label>
+                <div class="col-xs-6">
+                    <input class="form-control" type="text" name="ProductCost" value="<%-product['ProductCost']%>">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-2">Category : </label>
+                <div class="col-xs-6">
+                    <input class="form-control" type="text" name="Category" value="<%-product['Category']%>">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-2">Available Quantity : </label>
+                <div class="col-xs-6">
+                    <input class="form-control" type="text" name="AvailableQuantity" value="<%-product['AvailableQuantity']%>">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-2">Will the given product be used for auction?</label>
+                <div class="col-xs-2">
+                    <select class="form-control" name="IsAuction" id="IsAuction">
+                        <option value="Y" <%-product['IsAuction']=='Y'?'selected':''%>>Yes</option>
+                        <option value="N" <%-product['IsAuction']=='N'?'selected':''%>>No</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-2">Enter Bid Start Time: </label>
+                <div class="col-xs-6">
+                    <input class="form-control" type="text" name="BidStartTime" id="t1" placeholder="Format YYYY:MM:DD:HH:MM:SS" value="<%-product['BidStartTime']%>">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-xs-2">Enter Bid Start Time: </label>
+                <div class="col-xs-6">
+                    <input class="form-control" type="text" name="BidEndTime" id="t2" placeholder="Format YYYY:MM:DD:HH:MM:SS" value="<%-product['BidEndTime']%>">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button type="submit" class="btn btn-prim btn-s">Update</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
