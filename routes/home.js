@@ -146,8 +146,8 @@ function afterSignIn(req,res)
 
 function afterSignUp(req, res) {
 	var current_Date_Time = getDateTime();
-	var getUser = 'insert into person values ("' + req.param("inputEmail") + '", "' + req.param("inputPassword") + '","' + req.param("inputFirstName") + '", "' + req.param("inputLastName") + '", "' + req.param("inputAddress") + '","' +req.param("inputCity")
-	+ '", "' + req.param("inputState") + '", "' + req.param("inputZipcode") + '", "' + current_Date_Time + '", "' + 'C' + '",123,0)';
+	var getUser = 'insert into person (emailid,password, firstname,lastname,address,city,State,ZipCode, lastlogin,usertype) values ("' + req.param("inputEmail") + '", "' + req.param("inputPassword") + '","' + req.param("inputFirstName") + '", "' + req.param("inputLastName") + '", "' + req.param("inputAddress") + '","' +req.param("inputCity")
+	+ '", "' + req.param("inputState") + '", "' + req.param("inputZipcode") + '", "' + current_Date_Time + '", "' + 'C' + '")';
 	console.log("Query is:" + getUser);
 
 	mysql.fetchData(function(err, results) {
@@ -283,7 +283,7 @@ function connect()
 	var connection = mysqlDhanu.createConnection({
 		host     : 'localhost',
 		user     : 'root',
-		password : 'Sahithip123',
+		password : '',
 		database: 'cmpe273project' //'eBay'
 	});
 
@@ -339,7 +339,7 @@ function createProduct(SellerEmail,ProductName,ProductCondition,ProductDetails,P
 {
 	var connection=connect();
 	var eQuery = "INSERT INTO Product (ProductName,ProductCondition,ProductDetails,ProductCost,Category,AvailableQuantity,SellerEmailId,BidStartTime,BidEndTime,IsAuction) VALUES ('"+ProductName+"', '"+ProductCondition+"', '"+ProductDetails+"', '"+ProductCost+"', '"+Category+"', '"+AvailableQuantity+"', '"+SellerEmail+"', '"+BidStartTime+"', '"+BidEndTime+"', '"+AuctionFlag+"')";
-
+	console.log(eQuery);
 	connection.query(eQuery,function(eerr,eRows,eFields){
 		if(eerr)
 		{
@@ -673,21 +673,27 @@ function bidForProduct(req, res){
 	var product_id = req.param('p');
 	var bid = req.param('bid');
 	var rating = req.param('rating');
+	
 	var query = "select * from product where ProductId=" + product_id;
 	mysql.fetchData(function(err, results){
 		var product = results[0];
 		var bought = 'N';
+		var quantity = product['AvailableQuantity'];
 		if(product['IsAuction'].toLowerCase() == 'y'){
 			bid = bid || 0;
 		} else {
 			bid = product['ProductCost'];
 			bought = 'Y';
+			quantity = quantity - req.param('quantity') ;	
 		}
-		query = "insert into productbid (EmailId, ProductId, BidPrice, BoughtFlag, Rating) values (";
-		query += "'" + req.session.user.EmailId + "', " + product_id + ", " + bid + ", '" + bought + "', " + rating + ")";
+		var query1 = "update product set Availablequantity = "+quantity+" where productid = "+product_id+";";
+		query = "insert into productbid (EmailId, ProductId, BidPrice, BoughtFlag, Quantity , Rating) values (";
+		query += "'" + req.session.user.EmailId + "', " + product_id + ", " + bid + ", '" + bought + "', "+req.param('quantity')+" , " + rating + ")";
 		mysql.fetchData(function(err, results){
 			res.redirect('/browse');
 		}, query);
+		mysql.fetchData(function(err,result){	
+		},query1);
 	}, query);
 }
 
