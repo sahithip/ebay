@@ -146,8 +146,8 @@ function afterSignIn(req,res)
 
 function afterSignUp(req, res) {
 	var current_Date_Time = getDateTime();
-	var getUser = 'insert into person values ("' + req.param("inputEmail") + '", "' + req.param("inputPassword") + '","' + req.param("inputFirstName") + '", "' + req.param("inputLastName") + '", "' + req.param("inputAddress") + '","' +req.param("inputCity")
-	+ '", "' + req.param("inputState") + '", "' + req.param("inputZipcode") + '", "' + current_Date_Time + '", "' + 'C' + '",123,0)';
+	var getUser = 'insert into person(EmailId,Password,FirstName,LastName,Address,City,State,ZipCode,LastLogin,UserType) values ("' + req.param("inputEmail") + '", "' + req.param("inputPassword") + '","' + req.param("inputFirstName") + '", "' + req.param("inputLastName") + '", "' + req.param("inputAddress") + '","' +req.param("inputCity")
+	+ '", "' + req.param("inputState") + '", "' + req.param("inputZipcode") + '", "' + current_Date_Time + '", "' + 'C' + '")';
 	console.log("Query is:" + getUser);
 
 	mysql.fetchData(function(err, results) {
@@ -283,7 +283,7 @@ function connect()
 	var connection = mysqlDhanu.createConnection({
 		host     : 'localhost',
 		user     : 'root',
-		password : 'Sahithip123',
+		password : '',
 		database: 'cmpe273project' //'eBay'
 	});
 
