@@ -145,8 +145,11 @@ function afterSignIn(req,res)
 }
 
 function afterSignUp(req, res) {
+	var membershipno = 1000000000;
 	var current_Date_Time = getDateTime();
+
 	var getUser = 'insert into person (Emailid,Password,FirstName,LastName,Address,City,State,ZipCode,LastLogin,UserType,Rating) values ("' + req.param("inputEmail") + '", "' + req.param("inputPassword") + '","' + req.param("inputFirstName") + '", "' + req.param("inputLastName") + '", "' + req.param("inputAddress") + '","' +req.param("inputCity")
+
 	+ '", "' + req.param("inputState") + '", "' + req.param("inputZipcode") + '", "' + current_Date_Time + '", "' + 'C' + '",0)';
 	console.log("Query is:" + getUser);
 
