@@ -146,8 +146,8 @@ function afterSignIn(req,res)
 
 function afterSignUp(req, res) {
 	var current_Date_Time = getDateTime();
-	var getUser = 'insert into person values ("' + req.param("inputEmail") + '", "' + req.param("inputPassword") + '","' + req.param("inputFirstName") + '", "' + req.param("inputLastName") + '", "' + req.param("inputAddress") + '","' +req.param("inputCity")
-	+ '", "' + req.param("inputState") + '", "' + req.param("inputZipcode") + '", "' + current_Date_Time + '", "' + 'C' + '",123,0)';
+	var getUser = 'insert into person (Emailid,Password,FirstName,LastName,Address,City,State,ZipCode,LastLogin,UserType,Rating) values ("' + req.param("inputEmail") + '", "' + req.param("inputPassword") + '","' + req.param("inputFirstName") + '", "' + req.param("inputLastName") + '", "' + req.param("inputAddress") + '","' +req.param("inputCity")
+	+ '", "' + req.param("inputState") + '", "' + req.param("inputZipcode") + '", "' + current_Date_Time + '", "' + 'C' + '",0)';
 	console.log("Query is:" + getUser);
 
 	mysql.fetchData(function(err, results) {
@@ -209,6 +209,33 @@ function displayProduct(req, res) {
 	}, getUser);
 }
 
+function viewProduct(req, res) {
+	
+
+	var getUser = "select * from ProductBid a inner join Product b on a.ProductId = b.ProductId where b.ProductName = '"+req.params.ProductName+"'";
+	console.log("Query is:" + getUser);
+
+	mysql.fetchData(function(err, results) {
+		if (err) {
+			throw err;
+		} else {
+			console.log(" seller id :"+results[0]['SellerEmailId']);
+			
+			var getSeller = "select * from person where Emailid='"+results[0]['SellerEmailId']+"'";
+
+			mysql.fetchData(function(err, results2) {
+				if (err) {
+					throw err;
+				} else {
+
+					res.render('activity/view_product.ejs', {result: results, seller : results2});
+
+				}
+			}, getSeller);
+			
+		}
+	}, getUser);
+}
 function listAllAuctions(req,res)
 {
 	//Current or all auctions
@@ -761,6 +788,7 @@ exports.updateProduct=updateProduct;
 exports.createProduct=createProduct;
 exports.displayCustomers=displayCustomers;
 exports.displaySellers=displaySellers;
+exports.viewProduct=viewProduct;
 //exports.sellerAfterSignUp = sellerAfterSignUp;
 //exports.placeBid = placeBid;
 

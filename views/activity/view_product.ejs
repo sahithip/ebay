@@ -15,9 +15,6 @@
         .my-ebay p.menu-head {
             padding-left: 15px;
         }
-        input[type='radio'] {
-            vertical-align: text-bottom;
-        }
     </style>
 </head>
 <body class="summary-ui  lang-en site-id-0 geo-id-0 time-left-col  sz1200">
@@ -93,10 +90,10 @@
     <div id="top-nav">
         <div class="tabbable">
             <ul class="nav nav-tabs-p" role="navigation">
-                <li class="tab">
+                <li class="tab active">
                     <a href="/bids/current">Activity</a>
                 </li>
-                <li class="tab active">
+                <li class="tab ">
                     <a href="/browse">Browse</a>
                 </li>
                 <li class="tab">
@@ -108,83 +105,92 @@
     </div>
     <div id="domain-nav">
         <div class="menu-list" role="navigation">
-            <p class="menu-head selected">Categories</p>
+            <p class="menu-head selected">Bids</p>
             <div style="display: block" class="menu-body">
                 <ul>
-                    <% for(var i=0; i<categories.length; i++) {%>
-                    <li class="sub-menu-li <%=(i==0?'active':'')%>" id="<%=categories[i]%>">
-                        <a onclick="categoryClick('<%=categories[i]%>'); return false;"><%= categories[i] %></a>
+                    <li class=" sub-menu-li active"><a href="/bids/current">In progress</a></li>
+                    <li class=" sub-menu-li"><a href="/bids/won">Won</a></li>
+                    <li class=" sub-menu-li"><a href="/bids/missed">Didn't win</a></li>
+                </ul>
+            </div>
+            <p class="menu-head">Products</p>
+            <div style="display: block" class="menu-body">
+                <ul>
+                    <li class=" sub-menu-li"><a href="/products/waiting">Awaiting Sale</a></li>
+                    <li class=" sub-menu-li"><a href="/products/sold">Sold</a></li>
+                    <li class=" sub-menu-li"><a href="/products/bought">Bought</a></li>
+                    <li class=" sub-menu-li" style="height: auto; margin-bottom: 5px;">
+                        <button class="btn btn-scnd btn-s" style="width: 80%; margin-left: auto; margin-right: auto; display: block;" onclick="window.location.href='/products/add'">
+                            Put up for Sale
+                        </button>
                     </li>
-                    <% } %>
+                </ul>
+            </div>
+            <p class="menu-head ">Lists</p>
+            <div style="display: block;" class="menu-body">
+                <ul>
+                    <li class=" sub-menu-li"><a href="/list/sellers">All Sellers</a></li>
+                    <li class=" sub-menu-li"><a href="/browse">All Products</a></li>
                 </ul>
             </div>
         </div>
     </div>
     <div id="main-content">
-        <table class="table table-striped table-bordered">
-            <thead>
-            <tr>
-                <th>Name</th>
-                <th>Details</th>
-                <th>Condition</th>
-                <th>Category</th>
-                <th>Cost</th>
-                <th>Available Qty.</th>
-                <th>Rating</th>
-                <th>Action</th>
-            </tr>
-            </thead>
-            <tbody id="main-tbody"></tbody>
+    
+        <tbody>
+        <h1> <%-result[0]['ProductName']%> </h1> <br/>
+        
+      <h4>   Seller Information </h4> <br/>
+      <table class="table table-striped table-bordered">
+       <tr>
+       <td>
+      <h4> Seller Name </h4> <td> <%-seller[0]['FirstName']%> <br/>
+        </tr>
+        <tr>
+       <td>
+    <h4>    Cost </h4> <td> <%-result[0]['ProductCost']%> <br/>
+        </tr>
         </table>
+        
+        <table class="table table-striped table-bordered">
+        <tr> <td> <h4> Bidded by </h4> <td> <h4> Bid Price </h4> </tr>
+        
+       <!--      -->
+       
+      <% for(var i=0; i<result.length; i++) { %>
+            
+          
+         <% if(result[i]['BidPrice']!=null) { %>
+          
+             
+           <tr> <td>   <%-result[i]['EmailId']%> <td>  <%-result[i]['BidPrice']%> </tr>
+               
+                
+         
+            <% } %>
+               <% } %>
+          <!--      -->  
+          
+      <% for(var i=0; i<result.length; i++) {
+         
+         if(result[i]['BidPrice']=='') { %>
+       <tr> <td> <h4> Baught by  </h4> <td>  <h4> Price </h4> </tr>  
+       <%  break; 
+       } %>
+       
+      <% } %>
+      <% for(var i=0; i<result.length; i++) {
+         
+         if(result[i]['BidPrice']=='') { %>         
+          <tr>
+          <td>  <%-result[i]['EmailId']%> <td> <%-result[i]['ProductCost']%> <br/>
+          </tr>
+            <%}
+            
+              } %>
+            </tbody>
+      </table>
+    
     </div>
-    <script>
-        var main = document.getElementById('main-tbody');
-        var data = <%-JSON.stringify(products)%>;
-
-        var current_category = '<%=categories[0]%>';
-        function categoryClick(category){
-            console.log(category);
-            var curr = document.getElementById(current_category);
-            curr.className = "sub-menu-li";
-            var selected = document.getElementById(category);
-            selected.className = "sub-menu-li active";
-            current_category = category;
-            showProducts();
-        }
-
-        function showProducts(){
-            var products = data[current_category];
-            main.innerHTML = '';
-            for(var i=0; i<products.length; i++){
-                main.innerHTML += productCell(products[i]);
-            }
-        }
-
-        function productCell(product){
-            var row = "<tr>";
-            row += "<td><a href='/view_product/"+product['ProductName']+"'>" + product['ProductName'] + "</td>";
-            row += "<td>" + product['ProductDetails'] + "</td>";
-            row += "<td>" + product['ProductCondition'] + "</td>";
-            row += "<td>" + product['Category'] + "</td>";
-            row += "<td>$" + product['ProductCost'] + "</td>";
-            row += "<td>" + product['AvailableQuantity'] + "</td>";
-            row += "<td>" + product['rating'] + "</td>";
-            row += "<td><form action='/browse' method='POST'><input type='hidden' name='p' value='" + product['ProductId'] +"'/>";
-            if(product['IsAuction'].toLowerCase() === 'y'){
-                row += "<input type='text' placeholder='bid' name='bid' style='width: 60px; margin-right: 60px;'><button class='btn btn-scnd btn-s' type='submit'>Bid</button>";
-            } else {
-                row += "<button class='btn btn-prim btn-s' type='submit'>Buy</button>";
-            }
-            row += "<br>Rating: <input type='radio' name='rating' checked value='1'/> 1 ";
-            row += "<input type='radio' name='rating' value='2'/> 2 ";
-            row += "<input type='radio' name='rating' value='3'/> 3 ";
-            row += "<input type='radio' name='rating' value='4'/> 4 ";
-            row += "<input type='radio' name='rating' value='5'/> 5 ";
-            row += "</form></td></tr>";
-            return row;
-        }
-
-        showProducts();
-    </script>
 </div>
 </body>

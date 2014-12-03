@@ -71,6 +71,7 @@ app.get('/searchItem', authenticate, home.searchItem);
 app.get('/listAllAuctions', authenticate, home.listAllAuctions);
 app.get('/displayPersonDetails', authenticate, home.displayPersonDetails);
 app.get('/displayProductDetails', authenticate, home.displayProductDetails);
+app.get('/view_product/:ProductName', authenticate, home.viewProduct);
 
 //post
 app.post('/signUp', home.signUp);
