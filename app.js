@@ -37,7 +37,7 @@ app.use(session({
     store: new SessionStore({
         host: 'localhost',
         user: 'root',
-        password: 'root',
+        password: '',
         database: 'cmpe273project'
     })
 }));
@@ -82,7 +82,7 @@ app.post('/Customer/DeleteAccount', home.deleteExistingCustomer);
 
 
 /////
-//app.get('/', routes.index);
+app.get('/', routes.index);
 app.get('/Product', authenticate, function (req, res) {
     home.getProducts(function (Err, Results) {
 
