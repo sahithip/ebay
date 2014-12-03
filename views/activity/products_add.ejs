@@ -160,7 +160,10 @@
             <div class="form-group">
                 <label class="control-label col-xs-2">Product Condition : </label>
                 <div class="col-xs-6">
-                    <input class="form-control" type="text" name="ProductCondition" required="true">
+                   <select class="form-control" name="ProductCondition" id="ProductCondition" onchange="auctionUpdate()">
+                        <option value="New" selected>New</option>
+                        <option value="Used">Used</option>
+                    </select>
                 </div>
             </div>
 

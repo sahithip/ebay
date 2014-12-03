@@ -376,7 +376,7 @@ function updateProduct(updateProduct,updateAttribute,updateValue)
 
 function createProduct(SellerEmail,ProductName,ProductCondition,ProductDetails,ProductCost,Category,AvailableQuantity,BidStartTime,BidEndTime,AuctionFlag)
 {
-	var connection=connect();
+	 /*var connection=connect();
 	var eQuery = "INSERT INTO Product (ProductName,ProductCondition,ProductDetails,ProductCost,Category,AvailableQuantity,SellerEmailId,BidStartTime,BidEndTime,IsAuction) VALUES ('"+ProductName+"', '"+ProductCondition+"', '"+ProductDetails+"', '"+ProductCost+"', '"+Category+"', '"+AvailableQuantity+"', '"+SellerEmail+"', '"+BidStartTime+"', '"+BidEndTime+"', '"+AuctionFlag+"')";
 	console.log(eQuery);
 	connection.query(eQuery,function(eerr,eRows,eFields){
@@ -391,7 +391,16 @@ function createProduct(SellerEmail,ProductName,ProductCondition,ProductDetails,P
 		}
 
 	});
-	connection.end();
+	connection.end(); */
+	var eQuery = "INSERT INTO Product (ProductName,ProductCondition,ProductDetails,ProductCost,Category,AvailableQuantity,SellerEmailId,BidStartTime,BidEndTime,IsAuction) VALUES ('"+ProductName+"', '"+ProductCondition+"', '"+ProductDetails+"', '"+ProductCost+"', '"+Category+"', '"+AvailableQuantity+"', '"+SellerEmail+"', '"+BidStartTime+"', '"+BidEndTime+"', '"+AuctionFlag+"')";
+
+	mysql.fetchData(function(err, results) {
+		if (err) {
+			throw err;
+		} else {
+			
+		}
+	}, eQuery);
 }
 
 function displaySellers(callback)
@@ -734,7 +743,7 @@ if(req.param("OnlyAvailable") == 'Y')
 	} */
 if(req.param("ProductCost1")<req.param("ProductCost2"))
 {
- query = query + "and ProductCost >= "+req.param("ProductCost1")+" and ProductCost <="+req.param("ProductCost2")+"";
+ query = query + "and ProductCost >= "+req.param("ProductCost1")+"and ProductCost <="+req.param("ProductCost2")+"";
 }
 
 mysql.fetchData(function(err, results){
