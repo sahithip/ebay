@@ -154,10 +154,11 @@ function afterSignIn(req,res)
 }
 
 function afterSignUp(req, res) {
-	var membershipno = 1000000000;
 	var current_Date_Time = getDateTime();
-	var getUser = 'insert into person(EmailId,Password,FirstName,LastName,Address,City,State,ZipCode,LastLogin,UserType,Rating) values ("' + req.param("inputEmail") + '", "' + req.param("inputPassword") + '","' + req.param("inputFirstName") + '", "' + req.param("inputLastName") + '", "' + req.param("inputAddress") + '","' +req.param("inputCity")
-	+ '", "' + req.param("inputState") + '", "' + req.param("inputZipcode") + '", "' + current_Date_Time + '", "' + 'C' + '",0)';
+
+	var getUser = 'insert into person(EmailId,Password,FirstName,LastName,Address,City,State,ZipCode,LastLogin,UserType) values ("' + req.param("inputEmail") + '", "' + req.param("inputPassword") + '","' + req.param("inputFirstName") + '", "' + req.param("inputLastName") + '", "' + req.param("inputAddress") + '","' +req.param("inputCity")
+	+ '", "' + req.param("inputState") + '", "' + req.param("inputZipcode") + '", "' + current_Date_Time + '", "' + 'C' + '")';
+
 	console.log("Query is:" + getUser);
 
 	mysql.fetchData(function(err, results) {
@@ -219,6 +220,33 @@ function displayProduct(req, res) {
 	}, getUser);
 }
 
+function viewProduct(req, res) {
+	
+
+	var getUser = "select * from ProductBid a inner join Product b on a.ProductId = b.ProductId where b.ProductName = '"+req.params.ProductName+"'";
+	console.log("Query is:" + getUser);
+
+	mysql.fetchData(function(err, results) {
+		if (err) {
+			throw err;
+		} else {
+			console.log(" seller id :"+results[0]['SellerEmailId']);
+			
+			var getSeller = "select * from person where Emailid='"+results[0]['SellerEmailId']+"'";
+
+			mysql.fetchData(function(err, results2) {
+				if (err) {
+					throw err;
+				} else {
+
+					res.render('activity/view_product.ejs', {result: results, seller : results2});
+
+				}
+			}, getSeller);
+			
+		}
+	}, getUser);
+}
 function listAllAuctions(req,res)
 {
 	//Current or all auctions
@@ -294,6 +322,7 @@ function connect()
 		host     : 'localhost',
 		user     : 'root',
 		password : 'root',
+		//password : '',
 		database: 'cmpe273project' //'eBay'
 	});
 
@@ -752,21 +781,27 @@ function bidForProduct(req, res){
 	var product_id = req.param('p');
 	var bid = req.param('bid');
 	var rating = req.param('rating');
+	
 	var query = "select * from product where ProductId=" + product_id;
 	mysql.fetchData(function(err, results){
 		var product = results[0];
 		var bought = 'N';
+		var quantity = product['AvailableQuantity'];
 		if(product['IsAuction'].toLowerCase() == 'y'){
 			bid = bid || 0;
 		} else {
 			bid = product['ProductCost'];
 			bought = 'Y';
+			quantity = quantity - req.param('quantity') ;	
 		}
-		query = "insert into productbid (EmailId, ProductId, BidPrice, BoughtFlag, Rating) values (";
-		query += "'" + req.session.user.EmailId + "', " + product_id + ", " + bid + ", '" + bought + "', " + rating + ")";
+		var query1 = "update product set Availablequantity = "+quantity+" where productid = "+product_id+";";
+		query = "insert into productbid (EmailId, ProductId, BidPrice, BoughtFlag, Quantity , Rating) values (";
+		query += "'" + req.session.user.EmailId + "', " + product_id + ", " + bid + ", '" + bought + "', "+req.param('quantity')+" , " + rating + ")";
 		mysql.fetchData(function(err, results){
 			res.redirect('/browse',{allCategories:req.session.allCategories});
 		}, query);
+		mysql.fetchData(function(err,result){	
+		},query1);
 	}, query);
 }
 
@@ -861,6 +896,7 @@ exports.displaySellers=displaySellers;
 exports.advancedSearch = advancedSearch;
 exports.personAdvancedSearch= personAdvancedSearch;
 exports.productAdvancedSearch = productAdvancedSearch;
+exports.viewProduct=viewProduct;
 //exports.sellerAfterSignUp = sellerAfterSignUp;
 //exports.placeBid = placeBid;
 

@@ -6,18 +6,14 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="description" content="eBay Application">
     <meta name="author" content="eBay: Apps">
-    <meta name="viewport" id="viewportMeta" content="width=1200">
+    <meta name="viewport" id="viewportMeta" content="width=1200"><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
     <link href="/css/extr.css" type="text/css" rel="stylesheet">
     <link href="/css/logo.css" type="text/css" rel="stylesheet">
     <link href="/css/prof.css" type="text/css" rel="stylesheet">
     <style>
         .my-ebay p.menu-head {
             padding-left: 15px;
-        }
-        .form-horizontal .form-group {
-            max-height: 40px;
         }
     </style>
 </head>
@@ -58,13 +54,11 @@
                             </td>
                             <td class="gh-td" id="gh-cat-td">
                                 <div id="gh-cat-box">
-                                     <select class="gh-sb gh-sprRetina" size="1" id="gh-cat" name="Category">
-                                         <option selected="selected" value="all">All</option>
-                                       <%for(var cat =0;cat<allCategories.length;cat++){%>
-                                       <option value="<%=allCategories[cat].category%>"><%=allCategories[cat].category%></option>
-                                       <%}%>
+                                    <select title="Select a category for search" class="gh-sb gh-sprRetina" size="1" id="gh-cat" name="category">
+                                        <option selected="selected" value="0">All Categories</option>
+                                        <!-- EJS logic to enumerate all categories -->
+                                        <option value="20081">Antiques</option>
                                     </select>
-                                    
                                 </div>
                             </td>
                             <td class="gh-td">
@@ -72,7 +66,7 @@
                             </td>
                             <td class="gh-td" id="gh-as-td">
                                 <div id="gh-as">
-                                    
+
                                 </div>
                             </td>
                         </tr>
@@ -111,22 +105,22 @@
     </div>
     <div id="domain-nav">
         <div class="menu-list" role="navigation">
-            <p class="menu-head">Bids</p>
+            <p class="menu-head selected">Bids</p>
             <div style="display: block" class="menu-body">
                 <ul>
-                    <li class=" sub-menu-li"><a href="/bids/current">In progress</a></li>
+                    <li class=" sub-menu-li active"><a href="/bids/current">In progress</a></li>
                     <li class=" sub-menu-li"><a href="/bids/won">Won</a></li>
                     <li class=" sub-menu-li"><a href="/bids/missed">Didn't win</a></li>
                 </ul>
             </div>
-            <p class="menu-head selected">Products</p>
+            <p class="menu-head">Products</p>
             <div style="display: block" class="menu-body">
                 <ul>
                     <li class=" sub-menu-li"><a href="/products/waiting">Awaiting Sale</a></li>
                     <li class=" sub-menu-li"><a href="/products/sold">Sold</a></li>
                     <li class=" sub-menu-li"><a href="/products/bought">Bought</a></li>
-                    <li class=" sub-menu-li active" style="height: auto; margin-bottom: 5px;">
-                        <button disabled class="btn btn-scnd btn-s" style="width: 80%; margin-left: auto; margin-right: auto; display: block;">
+                    <li class=" sub-menu-li" style="height: auto; margin-bottom: 5px;">
+                        <button class="btn btn-scnd btn-s" style="width: 80%; margin-left: auto; margin-right: auto; display: block;" onclick="window.location.href='/products/add'">
                             Put up for Sale
                         </button>
                     </li>
@@ -142,103 +136,19 @@
         </div>
     </div>
     <div id="main-content">
-        <%if (message) { %>
-        <div class="alert alert-<%=mclass%>"><%=message%></div>
-        <% } %>
-        <form action="/products/add" method="post" class="form-horizontal" style="margin-left: 40px;">
-
-            <div class="form-group">
-                <label class="control-label col-xs-2">Product Name * : </label>
-                <div class="col-xs-6">
-                    <input class="form-control" type="text" name="ProductName">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-xs-2">Product Condition : </label>
-                <div class="col-xs-6">
-                    <input class="form-control" type="text" name="ProductCondition">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-xs-2">Product Details : </label>
-                <div class="col-xs-6">
-                    <input class="form-control" type="text" name="ProductDetails">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-xs-2">Product Cost* : </label>
-                <div class="col-xs-6">
-                    <input class="form-control" type="text" name="ProductCost">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-xs-2" style='margin-right:0px'>Category : </label>
-                 <div class="col-xs-2">
-                <select class="form-control" id="Category" name="Category">
-                                       
-                                       <%for(var cat =0;cat<allCategories.length;cat++){%>
-                                       <option value="<%=allCategories[cat].category%>"><%=allCategories[cat].category%></option>
-                                       <%}%>
-                                    </select>
-                                    </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-xs-2">Available Quantity : </label>
-                <div class="col-xs-6">
-                    <input class="form-control" type="text" name="AvailableQuantity">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-xs-2">Will the given product be used for auction?</label>
-                <div class="col-xs-2">
-                    <select class="form-control" name="IsAuction" id="IsAuction" onchange="auctionUpdate()">
-                        <option value="Y" selected>Yes</option>
-                        <option value="N">No</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-xs-2">Enter Bid Start Time: </label>
-                <div class="col-xs-6">
-                
-                	<input class="form-control" type="datetime-local" name="BidStartTime" id="t2" value="2014-01-01T00:00:00">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="control-label col-xs-2">Enter Bid End Time: </label>
-                <div class="col-xs-6">
-                	<input class="form-control" type="datetime-local" name="BidEndTime" id="t2" value="2014-01-01T00:00:00">
-                    
-                </div>
-            </div>
-
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
-                    <button type="submit" class="btn btn-prim btn-s">Create</button>
-                </div>
-            </div>
-        </form>
+        <tbody>
+            <% for(var i=0; i<result.length; i++) {%>
+            
+                <%-result[i]['ProductName']%>
+                <%-result[i]['ProductDetails']%>
+                <%-result[i]['ProductCondition']%>
+                <%-result[i]['Category']%>
+                <%-result[i]['ProductCost']%>
+                <%-result[i]['BidPrice']%>
+            
+            <% } %>
+            </tbody>
+    
     </div>
 </div>
-<script>
-function auctionUpdate(){
-var a = document.getElementById('IsAuction');
-if(a.value == 'N'){
-document.getElementById('t1').disabled = true;
-document.getElementById('t2').disabled = true;
-} else {
-document.getElementById('t1').disabled = false;
-document.getElementById('t2').disabled = false;
-}
-}
-auctionUpdate();
-</script>
 </body>

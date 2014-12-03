@@ -37,7 +37,7 @@ app.use(session({
     store: new SessionStore({
         host: 'localhost',
         user: 'root',
-        password: 'root',
+        password: '',
         database: 'cmpe273project'
     })
 }));
@@ -71,6 +71,7 @@ app.get('/searchItem', authenticate, home.searchItem);
 app.get('/listAllAuctions', authenticate, home.listAllAuctions);
 app.get('/displayPersonDetails', authenticate, home.displayPersonDetails);
 app.get('/displayProductDetails', authenticate, home.displayProductDetails);
+app.get('/view_product/:ProductName', authenticate, home.viewProduct);
 
 //post
 app.post('/signUp', home.signUp);
@@ -81,7 +82,7 @@ app.post('/Customer/DeleteAccount', home.deleteExistingCustomer);
 
 
 /////
-//app.get('/', routes.index);
+app.get('/', routes.index);
 app.get('/Product', authenticate, function (req, res) {
     home.getProducts(function (Err, Results) {
 

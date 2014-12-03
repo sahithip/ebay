@@ -166,7 +166,7 @@
 
         function productCell(product){
             var row = "<tr>";
-            row += "<td>" + product['ProductName'] + "</td>";
+            row += "<td><a href='/view_product/"+product['ProductName']+"'>" + product['ProductName'] + "</td>";
             row += "<td>" + product['ProductDetails'] + "</td>";
             row += "<td>" + product['ProductCondition'] + "</td>";
             row += "<td>" + product['Category'] + "</td>";
@@ -177,8 +177,13 @@
             if(product['IsAuction'].toLowerCase() === 'y'){
                 row += "<input type='text' placeholder='bid' name='bid' style='width: 60px; margin-right: 60px;'><button class='btn btn-scnd btn-s' type='submit'>Bid</button>";
             } else {
+<<<<<<< HEAD
                 row += "<button class='btn btn-prim btn-s' type='submit' style='margin-right: 30px;'>Buy</button>";
                 row += "<button class='btn btn-prim btn-s' type='submit'>Add To Cart</button>";
+=======
+            	
+                row += "<input type='number' min ='1' placeholder='quantity' name='quantity' style='width: 75px; margin-right: 60px;'><button class='btn btn-prim btn-s' type='submit'>Buy</button>";
+>>>>>>> 78996bc1aefc21add7cb657572e9d6f177ba4972
             }
             row += "<br>Rating: <input type='radio' name='rating' checked value='1'/> 1 ";
             row += "<input type='radio' name='rating' value='2'/> 2 ";

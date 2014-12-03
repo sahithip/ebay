@@ -139,7 +139,7 @@
             </div>
         </div>
     </div>
-    <div id="main-content">
+   <div id="main-content">
         <table class="table table-striped table-bordered">
             <thead>
             <tr>
@@ -154,7 +154,7 @@
             <tbody id="main-tbody">
             <% for(var i=0; i<bids.length; i++) {%>
             <tr>
-                <td><%-bids[i]['ProductName']%></td>
+                <td><a href="/view_product/<%-bids[i]['ProductName']%>"><%-bids[i]['ProductName']%></a></td>
                 <td><%-bids[i]['ProductDetails']%></td>
                 <td><%-bids[i]['ProductCondition']%></td>
                 <td><%-bids[i]['Category']%></td>
@@ -164,6 +164,6 @@
             <% } %>
             </tbody>
         </table>
-    </div>
+    </div> 
 </div>
 </body>
