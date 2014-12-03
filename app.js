@@ -203,7 +203,7 @@ app.post('/products/add', authenticate, function (req, res) {
         mclass = 'info';
         message = 'Successfully added!';
     }
-    res.render('activity/products_add.ejs', {mclass: mclass, message: message});
+    res.render('activity/products_add.ejs', {allCategories:req.session.allCategories,mclass: mclass, message: message});
 });
 app.get('/products/update', authenticate, home.editProduct);
 app.post('/products/update', authenticate, home.modifyProduct);
@@ -213,7 +213,9 @@ app.get('/list/sellers', authenticate, home.allSellers);
 app.get('/browse', authenticate, home.categoryGroupedListing);
 app.post('/browse', authenticate, home.bidForProduct);
 app.get('/search', authenticate, home.categoryGroupedListing);
-
+app.get('/advancedSearch',authenticate, home.advancedSearch);
+app.post('/personAdvancedSearch',authenticate,home.personAdvancedSearch);
+app.post('/productAdvancedSearch',authenticate,home.productAdvancedSearch);
 app.get('/account', authenticate, home.updateUserForm);
 app.post('/account', authenticate, home.updateUser);
 

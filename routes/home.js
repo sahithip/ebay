@@ -64,17 +64,26 @@ function doSignIn(req, res){
 	var email = req.param("inputEmail");
 	var password = req.param("inputPassword");
 	var query = "select * from person where EmailId='"+email+"' and password='" + password + "'";
+	var queryCat = "select * from category";
 	mysql.fetchData(function(err, results) {
 		if (err) {
 			throw err;
 		} else {
+			mysql.fetchData(function(caterr, catresults) {
+				if (caterr) {
+					throw caterr;
+				} else {
 			if(!results.length){
 				return res.redirect('/signIn?m=' + 'Invalid Credentials');
 			}
 			var user = results[0];
 			delete user['Password'];
 			req.session.user = user;
+			req.session.allCategories = catresults;
+			console.log(req.session.allCategories);
 			res.redirect('/bids/current');
+				}
+			},queryCat);
 		}
 	}, query);
 }
@@ -219,7 +228,7 @@ function listAllAuctions(req,res)
 			console.log(err);
 			throw err;
 		}
-		ejs.renderFile('./views/Auctions',function(err, result) {
+		ejs.renderFile('./views/Auctions',{allCategories:req.session.allCategories},function(err, result) {
 			// render on success
 			if (!err) {
 				res.end(result);
@@ -284,7 +293,7 @@ function connect()
 	var connection = mysqlDhanu.createConnection({
 		host     : 'localhost',
 		user     : 'root',
-		password : 'Sahithip123',
+		password : 'root',
 		database: 'cmpe273project' //'eBay'
 	});
 
@@ -340,7 +349,7 @@ function createProduct(SellerEmail,ProductName,ProductCondition,ProductDetails,P
 {
 	var connection=connect();
 	var eQuery = "INSERT INTO Product (ProductName,ProductCondition,ProductDetails,ProductCost,Category,AvailableQuantity,SellerEmailId,BidStartTime,BidEndTime,IsAuction) VALUES ('"+ProductName+"', '"+ProductCondition+"', '"+ProductDetails+"', '"+ProductCost+"', '"+Category+"', '"+AvailableQuantity+"', '"+SellerEmail+"', '"+BidStartTime+"', '"+BidEndTime+"', '"+AuctionFlag+"')";
-
+	console.log(eQuery);
 	connection.query(eQuery,function(eerr,eRows,eFields){
 		if(eerr)
 		{
@@ -554,7 +563,7 @@ function inProgressBids(req, res){
 	var email = req.session.user.EmailId;
 	var query = "select * from ProductBid a inner join Product b on a.ProductId = b.ProductId where a.EmailId = '" + email + "' and b.BidEndTime > '" + getDateTime() + "'";
 	mysql.fetchData(function(err, results){
-		res.render('activity/bids_in_progress.ejs', {bids: results});
+		res.render('activity/bids_in_progress.ejs',{allCategories:req.session.allCategories,bids: results});
 	}, query);
 }
 
@@ -563,7 +572,7 @@ function wonBids(req, res){
 	var query = "select * from ProductBid a inner join Product b on a.ProductId = b.ProductId where a.EmailId = '" + email + "' and lower(b.IsAuction) = 'y' and lower(a.BoughtFlag) = 'y'";
 	mysql.fetchData(function(err, results){
 		console.log(results);
-		res.render('activity/bids_won.ejs', {bids: results});
+		res.render('activity/bids_won.ejs',{allCategories:req.session.allCategories,bids: results});
 	}, query);
 }
 
@@ -572,16 +581,16 @@ function lostBids(req, res){
 	var query = "select * from ProductBid a inner join Product b on a.ProductId = b.ProductId where a.EmailId = '" + email + "' and lower(b.IsAuction) = 'y' and lower(a.BoughtFlag) != 'y' and b.BidEndTime < '" + getDateTime() + "'";
 	mysql.fetchData(function(err, results){
 		console.log(results);
-		res.render('activity/bids_missed.ejs', {bids: results});
+		res.render('activity/bids_missed.ejs',{allCategories:req.session.allCategories,bids: results});
 	}, query);
 }
 
 function waitingProducts(req, res){
 	var email = req.session.user.EmailId;
-	var query = "select * from product where ProductId not in (select ProductId from productbid where ProductId in (select ProductId from product where EmailId = '" + email + "') and lower(BoughtFlag) = 'y')";
+	var query = "select * from product where SellerEmailId = '"+email+"' and ProductId not in (select ProductId from productbid where ProductId in (select ProductId from product where EmailId = '" + email + "') and lower(BoughtFlag) = 'y')";
 	mysql.fetchData(function(err, results){
 		console.log(results);
-		res.render('activity/products_waiting.ejs', {products: results});
+		res.render('activity/products_waiting.ejs',{allCategories:req.session.allCategories,products: results});
 	}, query);
 }
 
@@ -590,7 +599,7 @@ function soldProducts(req, res){
 	var query = "select * from productbid a inner join product b on a.ProductId = b.ProductId where b.SellerEmailId = '" + email + "' and lower(BoughtFlag) = 'y'";
 	mysql.fetchData(function(err, results){
 		console.log(results);
-		res.render('activity/products_sold.ejs', {products: results});
+		res.render('activity/products_sold.ejs',{allCategories:req.session.allCategories,products: results});
 	}, query);
 }
 
@@ -599,7 +608,7 @@ function boughtProducts(req, res){
 	var query = "select * from productbid a inner join product b on a.ProductId = b.ProductId where a.EmailId = '" + email + "' and lower(BoughtFlag) = 'y'";
 	mysql.fetchData(function(err, results){
 		console.log(results);
-		res.render('activity/products_bought.ejs', {products: results});
+		res.render('activity/products_bought.ejs',{allCategories:req.session.allCategories,products: results});
 	}, query);
 }
 
@@ -607,16 +616,16 @@ function allSellers(req, res){
 	var query = "select * from person a inner join (select c.EmailId, avg(rating) as rating from productbid c group by c.EmailId) b on a.EmailId = b.EmailId where a.EmailId in (select distinct SellerEmailId from product)";
 	mysql.fetchData(function(err, results){
 		console.log(results);
-		res.render('activity/list_sellers.ejs', {sellers: results});
+		res.render('activity/list_sellers.ejs',{allCategories:req.session.allCategories,sellers: results});
 	}, query);
 }
 
 function createProductForm(req, res){
-	res.render('activity/products_add.ejs', {mclass: 'info', message: null});
+	res.render('activity/products_add.ejs',{allCategories:req.session.allCategories,mclass: 'info', message: null});
 }
 
 function updateUserForm(req, res){
-	res.render('activity/account.ejs', {mclass: 'info', message: null});
+	res.render('activity/account.ejs',{allCategories:req.session.allCategories,mclass: 'info', message: null});
 }
 
 function updateUser(req, res){
@@ -632,14 +641,83 @@ function updateUser(req, res){
 			mclass = 'info';
 			message = 'Successfully updated!';
 		}
-		res.render('activity/account.ejs', {mclass: mclass, message: message});
+		res.render('activity/account.ejs',{allCategories:req.session.allCategories,mclass: mclass, message: message});
 	}, query);
 }
+function advancedSearch(req,res)
+{
+	var message="";
+	var query = "select * from category";
+	mysql.fetchData(function(err, results){
+		if(err){
+			console.log(err);
+		}else{
+		console.log(results);
+		res.render('activity/advancedSearch.ejs',{allCategories:req.session.allCategories,categories: results ,message:message});
+		}
+	}, query);
+	
+}
+
+function personAdvancedSearch(req,res)
+{
+	var message="person";
+	var EmailId = req.param('EmailId');
+	var query;
+	if(EmailId=="")
+		{
+	 query = "select * from person where FirstName like'%"+req.param('FirstName') +"%' and LastName like'%"+req.param('LastName') +"%' and " +
+			"Address like'%"+req.param('Address') +"%' and City like'%"+req.param('City') +"%' and State like'%"+req.param('State') +"%' and ZipCode like'%"+req.param('ZipCode') +"%'" ;
+		}
+	else
+		{
+		query = "select * from person where FirstName like'%"+req.param('FirstName') +"%' and LastName like'%"+req.param('LastName') +"%' and " +
+		"EmailId='"+ req.param('EmailId') +"' and Address like'%"+req.param('Address') +"%' and City like'%"+req.param('City') +"%' and State like'%"+req.param('State') +"%' and ZipCode like'%"+req.param('ZipCode') +"%'" ;
+		}
+	mysql.fetchData(function(err, results){
+		if(err){
+			console.log(err);
+		}else{
+		console.log(results);
+		res.render('activity/displayAdvancedSearch.ejs',{allCategories:req.session.allCategories,details: results ,message:message});
+		}
+	}, query);
+	
+}
+
+function productAdvancedSearch(req,res)
+{
+	var message = "product";
+var bidsOnly = req.param("IsBid");
+var query = "select * from product where ProductName like'%"+req.param('ProductName')+"%' and ProductCondition like '%"+req.param('ProductCondition')+"%' and Category like '%"+req.param('Category')+"%'";
+
+if(bidsOnly=="Yes")
+	{
+		query = query + "and IsAuction = 'Y' ";
+	}
+if(req.param("OnlyAvailable") == 'Y')
+	{
+		query = query + "and AvailableQuantity > 0";
+	}
+if(!(req.param("ProductCost") == 0))
+	{
+	 query = query + "and ProductCost <= "+req.param("ProductCost")+"";
+	}
+mysql.fetchData(function(err, results){
+	if(err){
+		console.log(err);
+	}else{
+	console.log(results);
+	res.render('activity/displayAdvancedSearch.ejs',{allCategories:req.session.allCategories,details: results ,message:message});
+	}
+}, query);
+}
+
 
 function categoryGroupedListing(req, res){
 	var search_query = req.param('q');
 	var category = req.param('category');
-	if(category == "0") category = 0;
+	if(category == "all") category = 0;
 	var query = "select * from product a inner join (select ProductId, avg(rating) as rating from productbid group by ProductId) b on a.ProductId = b.ProductId";
 	if(search_query || category){
 		query += " where ";
@@ -666,7 +744,7 @@ function categoryGroupedListing(req, res){
 			products[results[i]['Category']].push(results[i]);
 			products['All'].push(results[i]);
 		}
-		res.render('activity/browse.ejs', {products: products, categories: Object.keys(products).sort()});
+		res.render('activity/browse.ejs',{allCategories:req.session.allCategories,products: products, categories: Object.keys(products).sort()});
 	}, query);
 }
 
@@ -687,7 +765,7 @@ function bidForProduct(req, res){
 		query = "insert into productbid (EmailId, ProductId, BidPrice, BoughtFlag, Rating) values (";
 		query += "'" + req.session.user.EmailId + "', " + product_id + ", " + bid + ", '" + bought + "', " + rating + ")";
 		mysql.fetchData(function(err, results){
-			res.redirect('/browse');
+			res.redirect('/browse',{allCategories:req.session.allCategories});
 		}, query);
 	}, query);
 }
@@ -704,7 +782,7 @@ function editProduct(req, res){
 			console.log(err);
 		} else {
 			var product = results[0];
-			res.render('activity/edit_product.ejs', {product: product, mclass: req.param('mc') || 'info', message: req.param('m') || null});
+			res.render('activity/edit_product.ejs',{allCategories:req.session.allCategories,product: product, mclass: req.param('mc') || 'info', message: req.param('m') || null});
 		}
 	}, query);
 }
@@ -719,10 +797,28 @@ function modifyProduct(req, res){
 		if(err){
 			console.log(err);
 		} else {
-			res.redirect('/products/update?mc=info&m=Successfully%20Updated!&p=' + product_id);
+			res.redirect('/products/update?mc=info&m=Successfully%20Updated!&p=' + product_id,{allCategories:req.session.allCategories});
 		}
 	}, query);
 }
+
+function shoppingCart(req,res)
+{
+	var query = "select * from product p where p.ProductId IN (select ProductId from shoppingcart where  EmailId = '"+req.session.user.EmailId+"')";
+	mysql.fetchData(function(err, results){
+		if(err){
+			console.log(err);
+		} else {
+			res.redirect('./shoppingCart.ejs',{allCategories:req.session.allCategories,items:results});
+		}
+	}, query);
+}
+
+function fromShoppingCart(req,res)
+{
+	
+}
+
 
 exports.afterSignUp = afterSignUp;
 exports.sellProduct = sellProduct;
@@ -762,6 +858,9 @@ exports.updateProduct=updateProduct;
 exports.createProduct=createProduct;
 exports.displayCustomers=displayCustomers;
 exports.displaySellers=displaySellers;
+exports.advancedSearch = advancedSearch;
+exports.personAdvancedSearch= personAdvancedSearch;
+exports.productAdvancedSearch = productAdvancedSearch;
 //exports.sellerAfterSignUp = sellerAfterSignUp;
 //exports.placeBid = placeBid;
 

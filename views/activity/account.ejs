@@ -58,11 +58,13 @@
                             </td>
                             <td class="gh-td" id="gh-cat-td">
                                 <div id="gh-cat-box">
-                                    <select title="Select a category for search" class="gh-sb gh-sprRetina" size="1" id="gh-cat" name="category">
-                                        <option selected="selected" value="0">All Categories</option>
-                                        <!-- EJS logic to enumerate all categories -->
-                                        <option value="20081">Antiques</option>
+                                     <select title="Select a category for search" class="gh-sb gh-sprRetina" size="1" id="gh-cat" name="category">
+                                        <option selected="selected" value="all">All Categories</option>
+                                       <%for(var cat =0;cat<allCategories.length;cat++){%>
+                                       <option value="<%=allCategories[cat].category%>"><%=allCategories[cat].category%></option>
+                                       <%}%>
                                     </select>
+                                    
                                 </div>
                             </td>
                             <td class="gh-td">
@@ -102,6 +104,9 @@
                 </li>
                 <li class="tab active">
                     <a href="/account">Account</a>
+                </li>
+                <li class="tab">
+                    <a href="/advancedSearch">Advanced Search</a>
                 </li>
             </ul>
         </div>
