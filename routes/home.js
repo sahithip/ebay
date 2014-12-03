@@ -728,10 +728,15 @@ if(req.param("OnlyAvailable") == 'Y')
 	{
 		query = query + "and AvailableQuantity > 0";
 	}
-if(!(req.param("ProductCost") == 0))
+/*if(!(req.param("ProductCost") == 0))
 	{
 	 query = query + "and ProductCost <= "+req.param("ProductCost")+"";
-	}
+	} */
+if(req.param("ProductCost1")<req.param("ProductCost2"))
+{
+ query = query + "and ProductCost >= "+req.param("ProductCost1")+" and ProductCost <="+req.param("ProductCost2")+"";
+}
+
 mysql.fetchData(function(err, results){
 	if(err){
 		console.log(err);
