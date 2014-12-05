@@ -661,17 +661,40 @@ function updateUser(req, res){
 	var query = "update person set FirstName='" + req.param('FirstName') + "', LastName='" + req.param('LastName') + "', ";
 	query += "Address='" + req.param('Address') + "', City='" + req.param('City') + "', State='" + req.param('State') + "', ZipCode=" + req.param('ZipCode');
 	query += " where EmailId='" + req.session.user.EmailId + "'";
+	var afterUpdateDetails = "select * from person where EmailId='"+req.session.user.EmailId+"'";
+	var mclass, message;
 	mysql.fetchData(function(err, results){
-		var mclass, message;
+		
 		if(err){
 			mclass = 'danger';
 			message = 'Invalid form data';
 		} else {
 			mclass = 'info';
 			message = 'Successfully updated!';
+			mysql.fetchData(function(err1, results1){
+				if(err1){
+					console.log(err1);
+					mclass = 'danger';
+					message = 'Invalid form data';
+				}
+				else
+					{
+					mclass = 'info';
+					message = 'Successfully updated!';
+					var user = results1[0];
+					console.log(user);
+					delete user['Password'];
+					
+					req.session.user = user;
+					res.render('activity/account.ejs',{user:req.session.user,allCategories:req.session.allCategories,mclass: mclass, message: message});
+					}
+			}, afterUpdateDetails);
+			
 		}
-		res.render('activity/account.ejs',{allCategories:req.session.allCategories,mclass: mclass, message: message});
+		
 	}, query);
+	
+	
 }
 function advancedSearch(req,res)
 {
@@ -781,7 +804,64 @@ function bidForProduct(req, res){
 	var product_id = req.param('p');
 	var bid = req.param('bid');
 	var rating = req.param('rating');
-	
+	var buyorcart = req.param('buyorcart');
+	var quantity = Number(req.param('quantity'));
+	if(buyorcart == "cart")
+		{
+		var addToCart="";
+		var checkCart = "select * from shoppingcart where EmailId='"+req.session.user.EmailId+"' and ProductId = "+product_id;
+		var getCartItems = "select * from product p,shoppingcart s where p.ProductId=s.ProductId and s.EmailId='"+req.session.user.EmailId+"' ";
+		mysql.fetchData(function(err5, results5){
+			//res.redirect('activity/shoppingcart.ejs',{allCategories:req.session.allCategories});
+			if(err5)
+				{
+					console.log(err5);
+				}
+			else
+				{
+					if(results5.length>0)
+						{
+							var qty = results5[0].Quantity;
+						    var newQ = quantity +qty;
+							addToCart = "update shoppingcart set Quantity="+newQ+" where ProductId="+product_id+" and EmailId='"+req.session.user.EmailId+"' "; 
+						}
+					else
+						{
+						addToCart = "insert into shoppingcart values('"+req.session.user.EmailId+"',"+product_id+","+req.param('quantity')+","+req.param('rating')+")";
+						}
+					var total=0;
+					mysql.fetchData(function(err, results){
+						//res.redirect('activity/shoppingcart.ejs',{allCategories:req.session.allCategories});
+						if(err)
+							{
+								console.log(err);
+							}
+						else
+							{
+							
+									mysql.fetchData(function(err2, cartItems){
+										
+										console.log(cartItems);
+										for(var i =0;i<cartItems.length;i++)
+											{
+												total+=(cartItems[i].ProductCost * cartItems[i].Quantity);
+											}
+										res.render('activity/shoppingcart.ejs',{total:total,cartItems:cartItems,allCategories:req.session.allCategories});
+										
+									}, getCartItems);
+									}
+					
+					}, addToCart);
+				}
+				},checkCart);
+		
+		
+		//var getQuantity = "select Quantity from shoppingcart where EmailId = '"+req.session.user.EmailId+"'";
+		
+		
+		
+		}
+	else{
 	var query = "select * from product where ProductId=" + product_id;
 	mysql.fetchData(function(err, results){
 		var product = results[0];
@@ -794,7 +874,7 @@ function bidForProduct(req, res){
 			bought = 'Y';
 			quantity = quantity - req.param('quantity') ;	
 		}
-		var query1 = "update product set Availablequantity = "+quantity+" where productid = "+product_id+";";
+		var query1 = "update product set AvailableQuantity = "+quantity+" where productid = "+product_id+";";
 		query = "insert into productbid (EmailId, ProductId, BidPrice, BoughtFlag, Quantity , Rating) values (";
 		query += "'" + req.session.user.EmailId + "', " + product_id + ", " + bid + ", '" + bought + "', "+req.param('quantity')+" , " + rating + ")";
 		mysql.fetchData(function(err, results){
@@ -803,6 +883,7 @@ function bidForProduct(req, res){
 		mysql.fetchData(function(err,result){	
 		},query1);
 	}, query);
+	}
 }
 
 function getCategories(callback){
@@ -837,24 +918,109 @@ function modifyProduct(req, res){
 	}, query);
 }
 
+
 function shoppingCart(req,res)
 {
-	var query = "select * from product p where p.ProductId IN (select ProductId from shoppingcart where  EmailId = '"+req.session.user.EmailId+"')";
-	mysql.fetchData(function(err, results){
+	var total = 0;
+	var query = "select * from product p,shoppingcart s where p.ProductId=s.ProductId and s.EmailId='"+req.session.user.EmailId+"' ";
+	mysql.fetchData(function(err, cartItems){
 		if(err){
 			console.log(err);
 		} else {
-			res.redirect('./shoppingCart.ejs',{allCategories:req.session.allCategories,items:results});
+			for(var i =0;i<cartItems.length;i++)
+			{
+				total+=(cartItems[i].ProductCost * cartItems[i].Quantity);
+			}
+			res.render('activity/shoppingCart.ejs',{total:total,allCategories:req.session.allCategories,cartItems:cartItems});
 		}
 	}, query);
 }
 
 function fromShoppingCart(req,res)
 {
+	var option = req.param('removeorbuy');
 	
+	if(option=='buy')
+		{
+			res.render('activity/payment.ejs',{allCategories:req.session.allCategories});
+		}
+	else
+		{
+			var query1 ="delete from shoppingcart where EmailId='"+req.session.user.EmailId+"' and ProductId="+option+"";
+			var total = 0;
+			var query = "select * from product p,shoppingcart s where p.ProductId=s.ProductId and s.EmailId='"+req.session.user.EmailId+"' ";
+			mysql.fetchData(function(error,remove){
+				if(error)
+					{
+						console.log(error);
+					}
+				else
+					{
+						mysql.fetchData(function(err, cartItems){
+							if(err){
+								console.log(err);
+							} else {
+								for(var i =0;i<cartItems.length;i++)
+								{
+									total+=(cartItems[i].ProductCost * cartItems[i].Quantity);
+								}
+								res.render('activity/shoppingCart.ejs',{total:total,allCategories:req.session.allCategories,cartItems:cartItems});
+							}
+						}, query);
+					}
+			},query1);
+			
+			
+		}
 }
 
+function thankYou(req,res)
+{
+	var getCartItems = "select * from product p,shoppingcart s where p.ProductId=s.ProductId and s.EmailId='"+req.session.user.EmailId+"' ";
+	var query = "delete from shoppingcart where EmailId='"+req.session.user.EmailId+"'";
+	
+	
+		
+		mysql.fetchData(function(err, results){
+			if(err){
+				console.log(err);
+			} 
+			else
+				{
+				
+					for(var i =0;i<results.length;i++)
+						{
+							
+						var updateQuantity="update product set AvailableQuantity="+(results[i].AvailableQuantity - results[i].Quantity)+" where ProductId="+results[i].ProductId+"";
+						var productHistory = "insert into productbid values('"+req.session.user.EmailId+"',"+results[i].ProductId+","+results[i].ProductCost+",'Y',"+results[i].Rating+","+results[i].Quantity+")";
+						mysql.fetchData(function(err1, results1){
+							if(err){
+								console.log(err1);
+							} 
+							mysql.fetchData(function(err2, results2){
+								if(err){
+									console.log(err2);
+								} 
+								
+							}, productHistory);
+								
+							
+						}, updateQuantity);
+								
+						}
+				}
+		}, getCartItems);	
+	mysql.fetchData(function(err3, results3){
+		if(err3){
+			console.log(err3);
+		} 
+	}, query);
+	res.render('activity/ThankYou.ejs',{allCategories:req.session.allCategories});
+}
 
+exports.thankYou = thankYou;
+exports.fromShoppingCart = fromShoppingCart;
+exports.shoppingCart = shoppingCart;
 exports.afterSignUp = afterSignUp;
 exports.sellProduct = sellProduct;
 exports.displayProduct = displayProduct;

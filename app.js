@@ -37,7 +37,7 @@ app.use(session({
     store: new SessionStore({
         host: 'localhost',
         user: 'root',
-        password: '',
+        password: 'root',
         database: 'cmpe273project'
     })
 }));
@@ -211,7 +211,11 @@ app.post('/products/update', authenticate, home.modifyProduct);
 
 app.get('/list/sellers', authenticate, home.allSellers);
 
+app.post('/fromShoppingCart', authenticate , home.fromShoppingCart);
+app.post('/shoppingCart',authenticate,home.shoppingCart);
+app.get('/shoppingCart',authenticate,home.shoppingCart);
 app.get('/browse', authenticate, home.categoryGroupedListing);
+app.get('/browse', authenticate, home.bidForProduct);
 app.post('/browse', authenticate, home.bidForProduct);
 app.get('/search', authenticate, home.categoryGroupedListing);
 app.get('/advancedSearch',authenticate, home.advancedSearch);
@@ -219,6 +223,7 @@ app.post('/personAdvancedSearch',authenticate,home.personAdvancedSearch);
 app.post('/productAdvancedSearch',authenticate,home.productAdvancedSearch);
 app.get('/account', authenticate, home.updateUserForm);
 app.post('/account', authenticate, home.updateUser);
+app.post('/thankYou', authenticate, home.thankYou);
 
 app.get('/logout', home.signOut);
 
