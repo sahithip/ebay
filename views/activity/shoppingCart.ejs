@@ -107,21 +107,63 @@
                 <li class="tab">
                     <a href="/advancedSearch">Advanced Search</a>
                 </li>
+                <li class="tab active">
+               
+                 <a href="/shoppingCart">Shopping Cart</a>
+                </li>
             </ul>
         </div>
         <div class="tabbable-bottom"></div>
     </div>
     <div id="domain-nav">
         <div class="menu-list" role="navigation">
-            <p class="menu-head selected">Advanced Search</p>
+            <p class="menu-head selected">Shopping Cart</p>
         </div>
     </div>
     <div id="main-content">
-        <%if (message) { %>
-        <div class="alert alert-<%=mclass%>"><%=message%></div>
-        <% } %>
-        <form action="/fromShoppingCart" method="post" class="form-horizontal" style="margin-left: 40px;">
-			
+      <form action="/fromShoppingCart" method="post" class="form-horizontal" style="margin-left: 40px;">
+	    <table class="table table-striped table-bordered">
+            <thead>
+            <tr>
+                <th>ProductId</th>
+                <th>ProductName</th>
+                <th>ProductDetails</th>
+                <th>ProductCondition</th>
+                <th>Category</th>
+                <th>ProductCost</th>
+                <th>Quantity Selected</th>
+            </tr>
+            </thead>
+            <tbody id="main-tbody">
+            <%for(var i=0; i<cartItems.length; i++) {%>
+            <tr>
+                <td><%-cartItems[i]['ProductId']%></td>
+                <td><a href="/view_product/<%-cartItems[i]['ProductName']%>"><%-cartItems[i]['ProductName']%></a></td>
+                <td><%-cartItems[i]['ProductDetails']%></td>
+                <td><%-cartItems[i]['ProductCondition']%></td>
+                <td><%-cartItems[i]['Category']%></td>
+                <td><%-cartItems[i]['ProductCost']%></td>
+                <td><%-cartItems[i]['Quantity']%></td>
+                <td><button name="removeorbuy" value="<%-cartItems[i]['ProductId']%>" class='btn btn-scnd btn-s' >Remove from Cart</button></td>
+                
+               
+            </tr>
+            
+           <% } %>
+           <%if(total>0){%>
+            <tr>
+            
+            	<td colspan='6' style='text-align:right'>Total Amount : <%=total%> </td>
+            	
+            	<td> <button name="removeorbuy" value="buy" class='btn btn-scnd btn-s' >Buy</button></td>
+            	
+            </tr>
+            <%}%>
+          
+            </tbody>
+        </table>
+        
+        
         </form>
     </div>
 </div>
