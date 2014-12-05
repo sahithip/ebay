@@ -1,6 +1,12 @@
 var ejs = require("ejs");
 var mysql = require('./mysql.js');
 var mysqlDhanu = require('mysql');
+var redis = require("redis"), client = redis.createClient();
+client.on("error", function(err) {
+	console.log("Error " + err);
+});
+
+
 function getDateTime() {
 
 	var date = new Date();
@@ -65,6 +71,7 @@ function doSignIn(req, res){
 	var password = req.param("inputPassword");
 	var query = "select * from person where EmailId='"+email+"' and password='" + password + "'";
 	var queryCat = "select * from category";
+	
 	mysql.fetchData(function(err, results) {
 		if (err) {
 			throw err;
@@ -86,7 +93,78 @@ function doSignIn(req, res){
 			},queryCat);
 		}
 	}, query);
-}
+} 
+
+/*function doSignIn(req, res){
+	var email = req.param("inputEmail");
+	var password = req.param("inputPassword");
+	var query = "select * from person where EmailId='"+email+"' and password='" + password + "'";
+	var queryCat = "select * from category";
+	
+	
+	console.log("Query is:" + queryCat);
+
+	client.get("displayCategory", function(err, reply) {
+		if (reply === null) {
+			// if not cached
+			console.log("no cache for category");
+			// cache SQL result, set cache(key,value)
+			
+			mysql.fetchData(function(err, results) {
+				if (err) {
+					throw err;
+				} else {
+					mysql.fetchData(function(caterr, catresults) {
+						if (caterr) {
+							throw caterr;
+						} else {
+							
+							console.log("i can see you!");
+							
+					if(!results.length){
+						return res.redirect('/signIn?m=' + 'Invalid Credentials');
+					}
+					var user = results[0];
+					delete user['Password'];
+					req.session.user = user;
+					req.session.allCategories = catresults;
+					console.log(req.session.allCategories);
+					res.redirect('/bids/current');
+					client.set("displayCategory",  JSON.stringify(catresults));
+
+						}
+					},queryCat);
+				}
+			}, query); 
+			
+		}else {
+			// if cached
+			
+		}
+	}); 
+	
+/*	mysql.fetchData(function(err, results) {
+		if (err) {
+			throw err;
+		} else {
+			mysql.fetchData(function(caterr, catresults) {
+				if (caterr) {
+					throw caterr;
+				} else {
+			if(!results.length){
+				return res.redirect('/signIn?m=' + 'Invalid Credentials');
+			}
+			var user = results[0];
+			delete user['Password'];
+			req.session.user = user;
+			req.session.allCategories = catresults;
+			console.log(req.session.allCategories);
+			res.redirect('/bids/current');
+				}
+			},queryCat);
+		}
+	}, query); 
+} */
 
 function signOut(req, res){
 	req.session.destroy();
@@ -196,7 +274,7 @@ function sellProduct(req, res) {
 
 function displayProduct(req, res) {
 
-	var getUser = "select * from product";
+ /* var getUser = "select * from product";
 	console.log("Query is:" + getUser);
 
 	mysql.fetchData(function(err, results) {
@@ -217,7 +295,65 @@ function displayProduct(req, res) {
 				}
 			});
 		}
-	}, getUser);
+	}, getUser); */
+	
+	
+	/************************************************************************/
+	
+	var getUser = "select * from product";
+	console.log("Query is:" + getUser);
+
+	client.get("displayProduct6", function(err, reply) {
+		if (reply === null) {
+			// if not cached
+			console.log("no cache");
+			// cache SQL result, set cache(key,value)
+			mysql.fetchData(function(err, results) {
+				if (err) {
+					throw err;
+				} else {
+					console.log("i can see you!");
+					ejs.renderFile('./views/displayElement.ejs', {
+						results : results
+					}, function(err, result) {
+						// render on success
+						if (!err) {			
+							client.set("displayProduct6",  JSON.stringify(results));
+							console.log("get displayProduct from DB");
+							console.log(JSON.stringify(results));
+
+							res.end(result);
+						}
+						// render or error
+						else {
+							res.end('An error occurred');
+							console.log(err);
+						}
+					});
+				}
+			}, getUser);
+		}else {
+			// if cached
+			console.log("get displayProduct from cache");
+			console.log(" reply " +JSON.parse(reply));
+
+			ejs.renderFile('./views/displayElement.ejs', {
+				results :JSON.parse(reply)
+			}, function(err, result) {
+				// render on success
+				if (!err) {			
+
+					res.end(result);
+				}
+				// render or error
+				else {
+					res.end('An error occurred');
+					console.log(err);
+				}
+			});
+		}
+	}); 
+	
 }
 
 function viewProduct(req, res) {

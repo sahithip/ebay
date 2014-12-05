@@ -153,16 +153,7 @@
         </table>
         
         <table class="table table-striped table-bordered">
-        
-        <% for(var i=0; i<result.length; i++) {
-     if(result[i]['BoughtFlag']=="N"){
-        %>
-       <tr> <td> <h4> Bidded By  </h4> <td>  <h4> Bid Price </h4> </tr>  
-       <%  break; 
-       } %>
-       
-      <% } %>
-       
+        <tr> <td> <h4> Bidded by </h4> <td> <h4> Bid Price </h4> </tr>
         
        <!--      -->
        
@@ -171,29 +162,28 @@
           
     
             
-     <% //if(result[i]['BidPrice']==null || result[i]['BidPrice']==0) 
-     if(result[i]['BoughtFlag']=="N")
-     { %>       
-           
+     <% if(result[i]['BidPrice']==null || result[i]['BidPrice']==0) { %>       
+            <% }
+            else { %>
                        <tr> <td>   <%-result[i]['EmailId']%> <td>  <%-result[i]['BidPrice']%> </tr>
-        
+         <%   }
+             %>
+             
             
-               <% } %>
                <% } %>
           <!--      -->  
           
       <% for(var i=0; i<result.length; i++) {
-     if(result[i]['BoughtFlag']=="Y"){
-        %>
+         
+         if(result[i]['BidPrice']==null || result[i]['BidPrice']==0.0) { %>
        <tr> <td> <h4> Bought by  </h4> <td>  <h4> Price </h4> </tr>  
        <%  break; 
        } %>
        
       <% } %>
       <% for(var i=0; i<result.length; i++) {
-        
-             if(result[i]['BoughtFlag']=="Y")
-        { %>         
+         
+         if(result[i]['BidPrice']==null || result[i]['BidPrice']==0.0 ) { %>         
           <tr>
           <td>  <%-result[i]['EmailId']%> <td> <%-result[i]['ProductCost']%> <br/>
           </tr>
