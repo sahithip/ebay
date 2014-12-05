@@ -37,7 +37,7 @@ app.use(session({
     store: new SessionStore({
         host: 'localhost',
         user: 'root',
-        password: '',
+        password: 'root11',
         database: 'cmpe273project'
     })
 }));
