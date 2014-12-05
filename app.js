@@ -37,7 +37,9 @@ app.use(session({
     store: new SessionStore({
         host: 'localhost',
         user: 'root',
+
         password: 'root11',
+
         database: 'cmpe273project'
     })
 }));
@@ -71,6 +73,7 @@ app.get('/searchItem', authenticate, home.searchItem);
 app.get('/listAllAuctions', authenticate, home.listAllAuctions);
 app.get('/displayPersonDetails', authenticate, home.displayPersonDetails);
 app.get('/displayProductDetails', authenticate, home.displayProductDetails);
+app.get('/view_product/:ProductName', authenticate, home.viewProduct);
 
 //post
 app.post('/signUp', home.signUp);
@@ -80,7 +83,7 @@ app.post('/sellProduct', home.sellProduct);
 app.post('/Customer/DeleteAccount', home.deleteExistingCustomer);
 
 
-/////
+
 app.get('/', routes.index);
 app.get('/Product', authenticate, function (req, res) {
     home.getProducts(function (Err, Results) {
@@ -174,7 +177,7 @@ app.get('/displayCustomers', authenticate, function (req, res) {
         }
     });
 });
-////
+
 
 app.post('/afterSignIn', home.afterSignIn);
 app.get('/showProfile', authenticate, home.showProfile);
@@ -203,19 +206,26 @@ app.post('/products/add', authenticate, function (req, res) {
         mclass = 'info';
         message = 'Successfully added!';
     }
-    res.render('activity/products_add.ejs', {mclass: mclass, message: message});
+    res.render('activity/products_add.ejs', {allCategories:req.session.allCategories,mclass: mclass, message: message});
 });
 app.get('/products/update', authenticate, home.editProduct);
 app.post('/products/update', authenticate, home.modifyProduct);
 
 app.get('/list/sellers', authenticate, home.allSellers);
 
+app.post('/fromShoppingCart', authenticate , home.fromShoppingCart);
+app.post('/shoppingCart',authenticate,home.shoppingCart);
+app.get('/shoppingCart',authenticate,home.shoppingCart);
 app.get('/browse', authenticate, home.categoryGroupedListing);
+app.get('/browse', authenticate, home.bidForProduct);
 app.post('/browse', authenticate, home.bidForProduct);
 app.get('/search', authenticate, home.categoryGroupedListing);
-
+app.get('/advancedSearch',authenticate, home.advancedSearch);
+app.post('/personAdvancedSearch',authenticate,home.personAdvancedSearch);
+app.post('/productAdvancedSearch',authenticate,home.productAdvancedSearch);
 app.get('/account', authenticate, home.updateUserForm);
 app.post('/account', authenticate, home.updateUser);
+app.post('/thankYou', authenticate, home.thankYou);
 
 app.get('/logout', home.signOut);
 

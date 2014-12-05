@@ -58,11 +58,13 @@
                             </td>
                             <td class="gh-td" id="gh-cat-td">
                                 <div id="gh-cat-box">
-                                    <select title="Select a category for search" class="gh-sb gh-sprRetina" size="1" id="gh-cat" name="category">
-                                        <option selected="selected" value="0">All Categories</option>
-                                        <!-- EJS logic to enumerate all categories -->
-                                        <option value="20081">Antiques</option>
+                                     <select title="Select a category for search" class="gh-sb gh-sprRetina" size="1" id="gh-cat" name="category">
+                                        <option selected="selected" value="all">All Categories</option>
+                                       <%for(var cat =0;cat<allCategories.length;cat++){%>
+                                       <option value="<%=allCategories[cat].category%>"><%=allCategories[cat].category%></option>
+                                       <%}%>
                                     </select>
+                                    
                                 </div>
                             </td>
                             <td class="gh-td">
@@ -103,6 +105,12 @@
                 <li class="tab active">
                     <a href="/account">Account</a>
                 </li>
+                <li class="tab">
+                    <a href="/advancedSearch">Advanced Search</a>
+                </li>
+                <li class="tab">
+                    <a href="/shoppingCart">Shopping Cart</a>
+                </li>
             </ul>
         </div>
         <div class="tabbable-bottom"></div>
@@ -121,49 +129,49 @@
             <div class="form-group">
                 <label class="control-label col-xs-2">First Name : </label>
                 <div class="col-xs-6">
-                    <input class="form-control" type="text" name="FirstName" value="<%-user.FirstName%>">
+                    <input class="form-control" type="text" name="FirstName" value="<%=user.FirstName%>">
                 </div>
             </div>
 
             <div class="form-group">
                 <label class="control-label col-xs-2">Last Name : </label>
                 <div class="col-xs-6">
-                    <input class="form-control" type="text" name="LastName" value="<%-user.LastName%>">
+                    <input class="form-control" type="text" name="LastName" value="<%=user.LastName%>">
                 </div>
             </div>
 
             <div class="form-group">
                 <label class="control-label col-xs-2">Email ID : </label>
                 <div class="col-xs-6">
-                    <input class="form-control" type="text" disabled  value="<%-user.EmailId%>">
+                    <input class="form-control" type="text" disabled  value="<%=user.EmailId%>">
                 </div>
             </div>
 
             <div class="form-group">
                 <label class="control-label col-xs-2">Address : </label>
                 <div class="col-xs-6">
-                    <input class="form-control" type="text" name="Address" value="<%-user.Address%>">
+                    <input class="form-control" type="text" name="Address" value="<%=user.Address%>">
                 </div>
             </div>
 
             <div class="form-group">
                 <label class="control-label col-xs-2">City : </label>
                 <div class="col-xs-6">
-                    <input class="form-control" type="text" name="City" value="<%-user.City%>">
+                    <input class="form-control" type="text" name="City" value="<%=user.City%>">
                 </div>
             </div>
 
             <div class="form-group">
                 <label class="control-label col-xs-2">State : </label>
                 <div class="col-xs-6">
-                    <input class="form-control" type="text" name="State" value="<%-user.State%>">
+                    <input class="form-control" type="text" name="State" value="<%=user.State%>">
                 </div>
             </div>
 
             <div class="form-group">
                 <label class="control-label col-xs-2">Zip Code :</label>
                 <div class="col-xs-2">
-                    <input class="form-control" type="text" name="ZipCode" value="<%-user.ZipCode%>">
+                    <input class="form-control" type="text" name="ZipCode" value="<%=user.ZipCode%>">
                 </div>
             </div>
 
