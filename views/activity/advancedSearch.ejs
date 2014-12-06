@@ -42,7 +42,7 @@
 <!--  Global Header -->
 <div id="header" style="margin-top: 30px; position: relative;">
     <div style="position: absolute; right: 0; top: -20px; font-size: 0.9em">
-        Hi <strong><%=user.FirstName%>!</strong> <small style="margin-left: 10px; font-size: 0.9em;">Not <%=user.FirstName%>? <a href="/logout">Logout</a></small>
+        Hi <strong><%=user.FirstName%>!</strong> <small style="margin-left: 20px; font-size: 0.9em;">LastLogin: <%=user.LastLogin%></small><small style="margin-left: 5px; font-size: 0.9em;">Not <%=user.FirstName%>? <a href="/logout">Logout</a></small>
     </div>
     <table class="gh-tbl">
         <tbody>
@@ -223,8 +223,8 @@
 
             <div class="form-group">
                 <label class="control-label col-xs-2">Product Cost: </label>
-                <div class="col-xs-6">
-                   <select id="ProductCost" name="ProductCost">
+              <!--  <div class="col-xs-6">
+                   <select id="ProductCost" name="ProductCost"> &nbsp;&nbsp;&nbsp;
                   
                 <option value =100> $0 - $100 </option>
                 <option value =200> $0 - $200 </option>
@@ -232,7 +232,12 @@
                 <option value =1000> $0 - $1000 </option>
                 <option value =0> ALL </option>
                 </select>
-                </div>
+                </div> -->
+                  <div class="col-xs-6">
+             Between &nbsp;&nbsp;&nbsp; <input type="text" name="ProductCost1"> </input> &nbsp;&nbsp;&nbsp; and &nbsp;&nbsp;&nbsp;
+                   <input type="text" name="ProductCost2"> </input>
+                    
+                </div> 
             </div>
 
             <div class="form-group">
