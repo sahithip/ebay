@@ -69,10 +69,18 @@ function signIn(req, res) {
 function doSignIn(req, res){
 	var email = req.param("inputEmail");
 	var password = req.param("inputPassword");
-	var query1= "update person set LastLogin='" + getDateTime()+  "' where EmailId='"+ email + "'";
+	console.log(password);
+	if( password.indexOf("'")!=-1 || password.indexOf(" ")!=-1 || password.indexOf("\"")!=-1 || email.indexOf("'")!=-1 || email.indexOf(" ")!=-1 || email.indexOf("\"")!=-1)
+		{
+		console.log("sql injection error");
+		return res.redirect('/signIn?m=' + 'SQL injection tried!!!!');
+
+		}
+	else{
+		
 	var query = "select * from person where EmailId='"+email+"' and password='" + password + "'";
 	var queryCat = "select * from category";
-	
+	var query1= "update person set LastLogin='" + getDateTime()+  "' where EmailId='"+ email + "'";
 	mysql.fetchData(function(err, results) {
 		if (err) {
 			throw err;
@@ -99,8 +107,12 @@ function doSignIn(req, res){
 			res.redirect('/bids/current');
 			},queryCat);
 		}
+
 	}, query1); }
 	},query);
+
+	}
+
 } 
 
 /*function doSignIn(req, res){
