@@ -1,6 +1,12 @@
 var ejs = require("ejs");
 var mysql = require('./mysql.js');
 var mysqlDhanu = require('mysql');
+/*var redis = require("redis"), client = redis.createClient();
+client.on("error", function(err) {
+	console.log("Error " + err);
+});  */
+
+
 function getDateTime() {
 
 	var date = new Date();
@@ -63,9 +69,89 @@ function signIn(req, res) {
 function doSignIn(req, res){
 	var email = req.param("inputEmail");
 	var password = req.param("inputPassword");
+	var query1= "update person set LastLogin='" + getDateTime()+  "' where EmailId='"+ email + "'";
 	var query = "select * from person where EmailId='"+email+"' and password='" + password + "'";
 	var queryCat = "select * from category";
+	
 	mysql.fetchData(function(err, results) {
+		if (err) {
+			throw err;
+		} else {
+			mysql.fetchData(function(quererr,queryresults){
+				if(quererr){
+					throw quererr;
+				} else {
+					mysql.fetchData(function(caterr, catresults) {
+						if (caterr) {
+							throw caterr;
+						} else {
+								if(!results.length){
+									return res.redirect('/signIn?m=' + 'Invalid Credentials');
+									}
+							}
+			
+			var user = results[0];
+			console.log(user);
+			delete user['Password'];
+			req.session.user = user;
+			req.session.allCategories = catresults;
+			console.log(req.session.allCategories);
+			res.redirect('/bids/current');
+			},queryCat);
+		}
+	}, query1); }
+	},query);
+} 
+
+/*function doSignIn(req, res){
+	var email = req.param("inputEmail");
+	var password = req.param("inputPassword");
+	var query = "select * from person where EmailId='"+email+"' and password='" + password + "'";
+	var queryCat = "select * from category";
+	
+	
+	console.log("Query is:" + queryCat);
+
+	client.get("displayCategory", function(err, reply) {
+		if (reply === null) {
+			// if not cached
+			console.log("no cache for category");
+			// cache SQL result, set cache(key,value)
+			
+			mysql.fetchData(function(err, results) {
+				if (err) {
+					throw err;
+				} else {
+					mysql.fetchData(function(caterr, catresults) {
+						if (caterr) {
+							throw caterr;
+						} else {
+							
+							console.log("i can see you!");
+							
+					if(!results.length){
+						return res.redirect('/signIn?m=' + 'Invalid Credentials');
+					}
+					var user = results[0];
+					delete user['Password'];
+					req.session.user = user;
+					req.session.allCategories = catresults;
+					console.log(req.session.allCategories);
+					res.redirect('/bids/current');
+					client.set("displayCategory",  JSON.stringify(catresults));
+
+						}
+					},queryCat);
+				}
+			}, query); 
+			
+		}else {
+			// if cached
+			
+		}
+	}); 
+	
+/*	mysql.fetchData(function(err, results) {
 		if (err) {
 			throw err;
 		} else {
@@ -85,8 +171,8 @@ function doSignIn(req, res){
 				}
 			},queryCat);
 		}
-	}, query);
-}
+	}, query); 
+} */
 
 function signOut(req, res){
 	req.session.destroy();
@@ -196,7 +282,7 @@ function sellProduct(req, res) {
 
 function displayProduct(req, res) {
 
-	var getUser = "select * from product";
+ /* var getUser = "select * from product";
 	console.log("Query is:" + getUser);
 
 	mysql.fetchData(function(err, results) {
@@ -217,7 +303,65 @@ function displayProduct(req, res) {
 				}
 			});
 		}
-	}, getUser);
+	}, getUser); */
+	
+	
+	/************************************************************************/
+	
+	var getUser = "select * from product";
+	console.log("Query is:" + getUser);
+
+	client.get("displayProduct6", function(err, reply) {
+		if (reply === null) {
+			// if not cached
+			console.log("no cache");
+			// cache SQL result, set cache(key,value)
+			mysql.fetchData(function(err, results) {
+				if (err) {
+					throw err;
+				} else {
+					console.log("i can see you!");
+					ejs.renderFile('./views/displayElement.ejs', {
+						results : results
+					}, function(err, result) {
+						// render on success
+						if (!err) {			
+							client.set("displayProduct6",  JSON.stringify(results));
+							console.log("get displayProduct from DB");
+							console.log(JSON.stringify(results));
+
+							res.end(result);
+						}
+						// render or error
+						else {
+							res.end('An error occurred');
+							console.log(err);
+						}
+					});
+				}
+			}, getUser);
+		}else {
+			// if cached
+			console.log("get displayProduct from cache");
+			console.log(" reply " +JSON.parse(reply));
+
+			ejs.renderFile('./views/displayElement.ejs', {
+				results :JSON.parse(reply)
+			}, function(err, result) {
+				// render on success
+				if (!err) {			
+
+					res.end(result);
+				}
+				// render or error
+				else {
+					res.end('An error occurred');
+					console.log(err);
+				}
+			});
+		}
+	}); 
+	
 }
 
 function viewProduct(req, res) {
@@ -376,7 +520,7 @@ function updateProduct(updateProduct,updateAttribute,updateValue)
 
 function createProduct(SellerEmail,ProductName,ProductCondition,ProductDetails,ProductCost,Category,AvailableQuantity,BidStartTime,BidEndTime,AuctionFlag)
 {
-	var connection=connect();
+	 /*var connection=connect();
 	var eQuery = "INSERT INTO Product (ProductName,ProductCondition,ProductDetails,ProductCost,Category,AvailableQuantity,SellerEmailId,BidStartTime,BidEndTime,IsAuction) VALUES ('"+ProductName+"', '"+ProductCondition+"', '"+ProductDetails+"', '"+ProductCost+"', '"+Category+"', '"+AvailableQuantity+"', '"+SellerEmail+"', '"+BidStartTime+"', '"+BidEndTime+"', '"+AuctionFlag+"')";
 	console.log(eQuery);
 	connection.query(eQuery,function(eerr,eRows,eFields){
@@ -391,7 +535,16 @@ function createProduct(SellerEmail,ProductName,ProductCondition,ProductDetails,P
 		}
 
 	});
-	connection.end();
+	connection.end(); */
+	var eQuery = "INSERT INTO Product (ProductName,ProductCondition,ProductDetails,ProductCost,Category,AvailableQuantity,SellerEmailId,BidStartTime,BidEndTime,IsAuction) VALUES ('"+ProductName+"', '"+ProductCondition+"', '"+ProductDetails+"', '"+ProductCost+"', '"+Category+"', '"+AvailableQuantity+"', '"+SellerEmail+"', '"+BidStartTime+"', '"+BidEndTime+"', '"+AuctionFlag+"')";
+
+	mysql.fetchData(function(err, results) {
+		if (err) {
+			throw err;
+		} else {
+			
+		}
+	}, eQuery);
 }
 
 function displaySellers(callback)
@@ -751,10 +904,15 @@ if(req.param("OnlyAvailable") == 'Y')
 	{
 		query = query + "and AvailableQuantity > 0";
 	}
-if(!(req.param("ProductCost") == 0))
+/*if(!(req.param("ProductCost") == 0))
 	{
 	 query = query + "and ProductCost <= "+req.param("ProductCost")+"";
-	}
+	} */
+if(req.param("ProductCost1")<req.param("ProductCost2"))
+{
+ query = query + "and ProductCost >= "+req.param("ProductCost1")+"and ProductCost <="+req.param("ProductCost2")+"";
+}
+
 mysql.fetchData(function(err, results){
 	if(err){
 		console.log(err);
