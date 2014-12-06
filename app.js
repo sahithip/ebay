@@ -66,6 +66,7 @@ app.get('/', home.signIn);
 
 //get
 app.get('/signIn', home.signIn);
+app.get('/signUp', home.signUp);
 app.get('/displayProduct', authenticate, home.displayProduct);
 app.get('/searchItem', authenticate, home.searchItem);
 app.get('/listAllAuctions', authenticate, home.listAllAuctions);

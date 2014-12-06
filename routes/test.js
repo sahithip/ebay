@@ -1,79 +1,132 @@
-var mysql = require('./mysql.js');
-
+var mysql = require('./sqlDao.js');
 var assert = require("assert");
 
- 
+describe('home', function(){
+
+	describe('displayProducts()', function(){
+
+		it('should display Products without error', function(done){
+
+			mysql.displayProduct(function(err,rows){
+
+				if (err) {
+
+					throw err;
+
+				} else {
+
+					console.log(" no error");
+
+					console.log(rows);
+
+					done();
+
+				}
+
+			});
+
+		});
+
+	});
+
+});
+
 
 describe('home', function(){
 
-describe('doSignIn()', function(){
+	describe('insertCategories()', function(){
 
-it('should validate User without error', function(done){
+		it('should Insert Categories without error', function(done){
 
- 
+			mysql.insertCat(function(err, results) {
 
-//Replace credentials
+				if (err) {
 
-var query = "select * from person where EmailId='sru@ebayapp.com' and password='sruthi123'";
+					throw err;
 
-mysql.fetchData(function(err, results) {
+				} else {
 
-if (err) {
+					console.log(" no error");
 
-throw err;
+					console.log(results);
 
-} else {
+					done();
 
-     console.log(" no error");
+				}
 
-     var fName = results[0].FirstName;
+			}, "Bathing");
 
-     console.log(fName);
+		});
 
-        assert.equal("Sru",fName);
-
-  done();
-
-}
-
-}, query);
+	});
 
 });
-
-});
-
-});
-
- 
 
 describe('home', function(){
 
-describe('displayProducts()', function(){
+	describe('deleteCategories()', function(){
 
-it('should display Products without error', function(done){
+		it('should delete Categories without error', function(done){
 
-var query = "select * from product";
+			mysql.deleteCat(function(err, results) {
 
-mysql.fetchData(function(err, results) {
+				if (err) {
 
-if (err) {
+					throw err;
 
-throw err;
+				} else {
 
-} else {
+					console.log(" no error");
 
-     console.log(" no error");
+					console.log(results);
 
-     console.log(results);
+					done();
 
-  done();
+				}
 
-}
+			}, "Bathing");
 
-}, query);
+		});
+
+	});
 
 });
 
+describe('home', function(){
+
+	describe('doSignIn()', function(){
+
+		it('should validate User without error', function(done){
+
+			mysql.validateUser(function(err,rows){
+				if (err) throw err;
+				console.log(" no error");
+				console.log(rows);
+				done();
+			}, 'sru@ebayapp.com', 'sruthi123');
+
+		});
+
+	});
+
 });
+
+
+describe('home', function(){
+
+	describe('updateLastLogin()', function(){
+
+		it('should update User without error', function(done){
+
+			mysql.updateLastLogin(function(err,rows){
+				if (err) throw err;
+				console.log(" no error");
+				console.log(rows);
+				done();
+			}, 'apu@ebayapp.com');
+
+		});
+
+	});
 
 });

@@ -2,7 +2,9 @@ function ConnectionPool(num_conns)
 {
     this.ConnectionPool = [];
     for(var i=0; i < num_conns; ++i)
-        this.ConnectionPool.push(createConn()); // your new Client + auth
+        this.ConnectionPool.push(createConn());
+    // your new Client + auth
+    console.log('With pooling'+num_conns+' connections established');
     this.last = 0;
 }
 
@@ -11,12 +13,12 @@ function createConn() {
   var connection = mysql.createConnection({
   host     : 'localhost',
   user     : 'root',
-  password : 'admin',
-  database: 'accounts'
+  password : 'root',
+  database: 'cmpe273project'
 });
 connection.connect(function(err) {
 	  if ( !err ) {
-	    console.log("Connected to MySQL");
+	   // console.log("Connected to MySQL");
 	  } else if ( err ) {
 	    console.log(err);
 	  }
