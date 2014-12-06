@@ -37,7 +37,7 @@ app.use(session({
     store: new SessionStore({
         host: 'localhost',
         user: 'root',
-        password: 'root',
+        password: 'root11',
         database: 'cmpe273project'
     })
 }));
@@ -82,7 +82,7 @@ app.post('/sellProduct', home.sellProduct);
 app.post('/Customer/DeleteAccount', home.deleteExistingCustomer);
 
 
-/////
+
 app.get('/', routes.index);
 app.get('/Product', authenticate, function (req, res) {
     home.getProducts(function (Err, Results) {
@@ -176,7 +176,7 @@ app.get('/displayCustomers', authenticate, function (req, res) {
         }
     });
 });
-////
+
 
 app.post('/afterSignIn', home.afterSignIn);
 app.get('/showProfile', authenticate, home.showProfile);
@@ -225,7 +225,13 @@ app.post('/productAdvancedSearch',authenticate,home.productAdvancedSearch);
 app.get('/account', authenticate, home.updateUserForm);
 app.post('/account', authenticate, home.updateUser);
 app.post('/thankYou', authenticate, home.thankYou);
-
+app.get('/addCategory',authenticate,home.addCategoryForm);
+app.post('/addcategory',authenticate,home.addCategory);
+app.get('/delCategory',authenticate,home.delCategoryForm);
+app.post('/delcategory',authenticate,home.delCategory);
+app.get('/ListCustomers',authenticate,home.allCustomers);
+app.get('/ListProducts',authenticate,home.allProducts);
+app.get('/displayAuction',authenticate,home.allbids);
 app.get('/logout', home.signOut);
 
 http.createServer(app).listen(app.get('port'), function () {

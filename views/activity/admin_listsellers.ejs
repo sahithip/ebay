@@ -1,0 +1,112 @@
+<html>
+<head>
+    <title>
+        My eBay&nbsp;Summary</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=EDGE">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="description" content="eBay Application">
+    <meta name="author" content="eBay: Apps">
+    <meta name="viewport" id="viewportMeta" content="width=1200"><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link href="/css/extr.css" type="text/css" rel="stylesheet">
+    <link href="/css/logo.css" type="text/css" rel="stylesheet">
+    <link href="/css/prof.css" type="text/css" rel="stylesheet">
+    <style>
+        .my-ebay p.menu-head {
+            padding-left: 15px;
+        }
+        .form-horizontal .form-group {
+            max-height: 40px;
+        }
+    </style>
+</head>
+<body class="summary-ui  lang-en site-id-0 geo-id-0 time-left-col  sz1200">
+<!--  Global Header -->
+<div id="header" style="margin-top: 30px; position: relative;">
+    <div style="position: absolute; right: 0; top: -20px; font-size: 0.9em">
+        Hi <strong><%=user.FirstName%>!</strong> <small style="margin-left: 10px; font-size: 0.9em;">Not <%=user.FirstName%>? <a href="/logout">Logout</a></small>
+    </div>
+    <table class="gh-tbl">
+        <tbody>
+        <tr>
+            <td class="gh-td">
+                <!--[if lt IE 9]><a href="http://www.ebay.com/" class="iclg" _sp="m570.l2586" id="gh-la">eBay
+                    <img width="117" height="120" style="clip:rect(47px, 118px, 95px, 0px); position:absolute; top:-47px;left:0" alt="" src="http://ir.ebaystatic.com/rs/v/apstidvcvu5pxlbxkphrrdo5iqv.png" id="gh-logo"></a><![endif]-->
+                <!--[if (gte IE 9)|!(IE)]><!--><a href="http://www.ebay.com/" class="iclg" _sp="m570.l2586" id="gh-la">eBay<img width="250" height="200" style="clip:rect(47px, 118px, 95px, 0px); position:absolute; top:-47px;left:0" alt="" src="http://ir.ebaystatic.com/rs/v/fxxj3ttftm5ltcqnto1o4baovyl.png" id="gh-logo"></a><!--<![endif]-->
+            </td>
+            <td class="gh-td">
+                <div id="gh-shop">
+                </div>
+            </td>
+            </tr>
+            </tbody>
+            </table>
+    </div>
+<!-- my-ebay Page content here -->
+
+<div id="my-ebay" class="my-ebay">
+    <div class="me-rtm topRtm">
+        <!-- FOR US/UK/DE -->
+        <div id="rtm_html_644" style="min-height: 30px;"></div>
+        <!-- FOR CA/AUS -->
+    </div>
+    <a id="mainContent" name="mainContent" tabindex="-1"></a>
+    <div id="top-nav">
+        <div class="tabbable">
+            <ul class="nav nav-tabs-p" role="navigation">
+                <li class="tab">
+                    <a href="/addCategory">Add Category</a>
+                </li>
+                <li class="tab">
+                    <a href="/delcategory">Delete Category</a>
+                </li>
+                <li class="tab active">
+                    <a href="/list/sellers">Sellers</a>
+                </li>
+                <li class="tab">
+                    <a href="/ListCustomers">Customers</a>
+                </li>
+                <li class="tab">
+                    <a href="/ListProducts">Products</a>
+                </li>
+                <li class="tab">
+                    <a href="/displayAuction">Display Bids</a>
+                </li>
+            </ul>
+        </div>
+        <div class="tabbable-bottom"></div>
+    </div>
+    <div id="domain-nav">
+        <div class="menu-list" role="navigation">
+            <p class="menu-head selected">List Sellers</p>
+        </div>
+    </div>
+    <div id="main-content">
+        <table class="table table-striped table-bordered">
+            <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Address</th>
+                <th>Rating</th>
+            </tr>
+            </thead>
+            <tbody id="main-tbody">
+            <% for(var i=0; i<sellers.length; i++) {%>
+            <tr>
+                <td><%-sellers[i]['FirstName']%></td>
+                <td><%-sellers[i]['LastName']%></td>
+                <td><%-sellers[i]['EmailId']%></td>
+                <td><%-sellers[i]['Address'] + ', ' + sellers[i]['City'] + ', ' + sellers[i]['State']%></td>
+                <td><%-sellers[i]['rating']%></td>
+            </tr>
+            <% } %>
+            </tbody>
+        </table>
+    </div>
+    
+    
+    </div>
+</body>

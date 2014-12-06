@@ -4,8 +4,8 @@ var poolModule = require('generic-pool');
 var connectParams = {
 		'hostname': 'localhost',
 		'user': 'root',
-		'password': 'admin',
-		'database': 'accounts'
+		'password': '',
+		'database': 'cmpe273project'
 }
 
 var pool = poolModule.Pool({

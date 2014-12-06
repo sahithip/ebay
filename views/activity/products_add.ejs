@@ -25,7 +25,7 @@
 <!--  Global Header -->
 <div id="header" style="margin-top: 30px; position: relative;">
     <div style="position: absolute; right: 0; top: -20px; font-size: 0.9em">
-        Hi <strong><%=user.FirstName%>!</strong> <small style="margin-left: 10px; font-size: 0.9em;">Not <%=user.FirstName%>? <a href="/logout">Logout</a></small>
+        Hi <strong><%=user.FirstName%>!</strong> <small style="margin-left: 20px; font-size: 0.9em;">LastLogin: <%=user.LastLogin%></small><small style="margin-left: 5px; font-size: 0.9em;">Not <%=user.FirstName%>? <a href="/logout">Logout</a></small>
     </div>
     <table class="gh-tbl">
         <tbody>
@@ -108,6 +108,7 @@
                 <li class="tab">
                     <a href="/advancedSearch">Advanced Search</a>
                 </li>
+
                 <li class="tab">
                     <a href="/shoppingCart">Shopping Cart</a>
                 </li>
@@ -163,7 +164,10 @@
             <div class="form-group">
                 <label class="control-label col-xs-2">Product Condition : </label>
                 <div class="col-xs-6">
-                    <input class="form-control" type="text" name="ProductCondition" required="true">
+                   <select class="form-control" name="ProductCondition" id="ProductCondition" onchange="auctionUpdate()">
+                        <option value="New" selected>New</option>
+                        <option value="Used">Used</option>
+                    </select>
                 </div>
             </div>
 
@@ -193,7 +197,12 @@
                                     </select>
                                     </div>
 
-                 </div>
+
+                
+            </div>
+
+               <!-- -->
+
 
             <div class="form-group">
                 <label class="control-label col-xs-2">Available Quantity : </label>
