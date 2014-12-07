@@ -1,5 +1,5 @@
 var ejs = require("ejs");
-//var mysql = require('./mysql.js');
+var mysqlconnection = require('mysql');
 var mysql = require('./mysql_withpool.js');
 
 //var CronJob = require('cron').CronJob;
@@ -377,14 +377,14 @@ function displayPersonDetails(req, res) {
 }
 
 function connect() {
-	var connection = mysqlDhanu.createConnection({
+	var connection = mysqlconnection.createConnection({
 		host     : 'localhost',
 		user     : 'root',
 		//password : 'root',
 		password : '',
 		database: 'cmpe273project' //'eBay'
 	});
-
+		
 	connection.connect();
 
 	return connection;
