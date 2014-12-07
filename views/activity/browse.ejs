@@ -123,8 +123,11 @@
             <p class="menu-head selected">Categories</p>
             <div style="display: block" class="menu-body">
                 <ul>
+                    <li class="sub-menu-li active" id="All">
+                        <a onclick="categoryClick('All'); return false;">All Categories</a>
+                    </li>
                     <% for(var i=0; i<allCategories.length; i++) {%>
-                    <li class="sub-menu-li <%=(i==0?'active':'')%>" id="<%=allCategories[i].category%>">
+                    <li class="sub-menu-li" id="<%=allCategories[i].category%>">
                         <a onclick="categoryClick('<%=allCategories[i].category%>'); return false;"><%= allCategories[i].category %></a>
                     </li>
                     <% } %>
@@ -156,7 +159,7 @@
     <script>
         var main = document.getElementById('main-tbody');
         var data = <%-JSON.stringify(products)%>;
-        var current_category = '<%=allCategories[0].category%>';
+        var current_category = 'All';
         function categoryClick(category){
             console.log(category);
             var curr = document.getElementById(current_category);
