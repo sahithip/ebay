@@ -299,7 +299,7 @@ function displayProduct(req, res) {
 
 function viewProduct(req, res) {
 
-	var getUser = "select * from ProductBid a inner join Product b on a.ProductId = b.ProductId where b.ProductName = '"
+	var getUser = "select * from ProductBid a right join Product b on a.ProductId = b.ProductId where b.ProductName = '"
 			+ req.params.ProductName + "'";
 	console.log("Query is:" + getUser);
 
@@ -1136,14 +1136,14 @@ function productAdvancedSearch(req, res) {
 			+ req.param('ProductName') + "%' and ProductCondition like '%"
 			+ req.param('ProductCondition') + "%' and Category like '%"
 			+ req.param('Category') + "%'";
-
+	
 	if (bidsOnly == "Yes") {
 		query = query + "and IsAuction = 'Y' ";
 	}
 	if (req.param("OnlyAvailable") == 'Y') {
 		query = query + "and AvailableQuantity > 0";
 	}
-	if (!(req.param("ProductCost") == 0)) {
+	if (!(req.param("ProductCost") == (0 || null))) {
 		query = query + "and ProductCost <= " + req.param("ProductCost") + "";
 	}
 	mysql.fetchData(function(err, results) {
