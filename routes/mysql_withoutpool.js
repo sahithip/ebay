@@ -14,8 +14,6 @@ function getConnection(){
 
 function fetchData(callback,sqlQuery){
 	
-	console.log("\nSQL Query::"+sqlQuery);
-	
 	var connection=getConnection();
 	
 	connection.query(sqlQuery, function(err, rows, fields) {
@@ -27,7 +25,6 @@ function fetchData(callback,sqlQuery){
 			callback(err, rows);
 		}
 	});
-	console.log("\nConnection closed..");
 	connection.end();
 }	
 

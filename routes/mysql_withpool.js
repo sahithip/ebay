@@ -17,8 +17,6 @@ function getConnection(){
 
 function fetchData(callback,sqlQuery){
 	
-	console.log("\nSQL Query::"+sqlQuery);
-	
 	var connection=pooling.get();
 	
 	connection.query(sqlQuery, function(err, rows, fields) {

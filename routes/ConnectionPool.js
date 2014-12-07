@@ -3,8 +3,6 @@ function ConnectionPool(num_conns)
     this.ConnectionPool = [];
     for(var i=0; i < num_conns; ++i)
         this.ConnectionPool.push(createConn());
-    // your new Client + auth
-    console.log('With pooling'+num_conns+' connections established');
     this.last = 0;
 }
 
@@ -31,8 +29,6 @@ connection.connect(function(err) {
 ConnectionPool.prototype.get = function()
 {
 	var threshold = 5;
-	console.log(threshold);
-	console.log("In get first"+this.last);
     var connection = this.ConnectionPool[this.last];
     this.last++;
     /*if (this.last == this.ConnectionPool.length){ // cyclic increment
@@ -44,17 +40,13 @@ ConnectionPool.prototype.get = function()
  
   
     }
-    
-    console.log("In get end"+this.last);
     return connection;
-}
+};
 
 ConnectionPool.prototype.release = function(mysqlConnection)
 {
-	console.log("In release start"+this.last);
 	 this.last--;
 	 this.ConnectionPool.push(mysqlConnection);
-	 console.log("In release end"+this.last);
-}
+};
 
 module.exports = ConnectionPool;
