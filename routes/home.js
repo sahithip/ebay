@@ -1177,13 +1177,13 @@ function bidForProduct(req, res) {
 
 	} else {
 		var query = "select * from product where ProductId=" + product_id;
-		mysql.fetchData(
-						function(err, results) {
+		mysql.fetchData( function(err, results) {
 							var product = results[0];
 							var bought = 'N';
 							var quantity = product['AvailableQuantity'];
 							if (product['IsAuction'].toLowerCase() == 'y') {
 								bid = bid || 0;
+								quantity =1;
 							} else {
 								bid = product['ProductCost'];
 								bought = 'Y';
@@ -1196,14 +1196,16 @@ function bidForProduct(req, res) {
 							query = "insert into productbid (EmailId, ProductId, BidPrice, BoughtFlag, Quantity , Rating) values (";
 							query += "'" + req.session.user.EmailId + "', "
 									+ product_id + ", " + bid + ", '" + bought
-									+ "', " + req.param('quantity') + " , "
+									+ "', " + quantity + " , "
 									+ rating + ")";
+							console.log("query---",query);
+							console.log("query1---",query1);
 							mysql.fetchData(function(err, results){
 				                            mysql.fetchData(function(err,result){
 					                        res.redirect('/browse?message=' + encodeURIComponent('You have placed a bid of ' + bid + ' on ' + product_name));
 				                            }, query1);
 						        }, query);
-						});
+						}, query);
 	}
 }
 
