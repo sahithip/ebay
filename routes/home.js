@@ -498,6 +498,26 @@ function createProduct(SellerEmail, ProductName, ProductCondition,
 	connection.end();
 }
 
+function displayProducts(callback){
+	var connection=connect();
+
+	var eQuery = "SELECT * from Product";
+	connection.query(eQuery,function(eerr,eRows,eFields){
+		if(eerr)
+		{
+			console.log("ERROR: " + eerr.message);
+		}
+		else
+		{
+			console.log("Products:" + JSON.stringify(eRows));
+			callback(eerr, eRows);
+		}
+
+	});
+	connection.end();
+	//poolObject.release(connection);
+}
+
 function displaySellers(callback) {
 	// var connection = poolObject.get();
 	var connection = connect();
@@ -777,6 +797,14 @@ function allSellers(req, res) {
 	}, query);
 }
 
+function allbids(req,res){
+	var query = "select * from Product where IsAuction = 'Y';";
+	mysql.fetchData(function(err, results){
+		console.log(results);
+		res.render('activity/admin_listbids.ejs',{allCategories:req.session.allCategories,bids: results});
+	}, query);
+}
+
 function createProductForm(req, res) {
 	res.render('activity/products_add.ejs', {
 		allCategories : req.session.allCategories,
@@ -791,6 +819,67 @@ function updateUserForm(req, res) {
 		mclass : 'info',
 		message : null
 	});
+}
+
+function allCustomers(req, res){
+	var query = "select * from person  where UserType='C'";
+	mysql.fetchData(function(err, results){
+		console.log(results);	
+			res.render('activity/admin_listcustomers.ejs',{allCategories:req.session.allCategories,sellers: results});
+	}, query);
+}
+
+function allProducts(req,res){
+	var query = "select * from product";
+	mysql.fetchData(function(err, results){
+		console.log(results);	
+			res.render('activity/admin_listproducts.ejs',{allCategories:req.session.allCategories,products: results});
+	}, query);
+}
+
+function addCategoryForm(req,res){
+	console.log("I am here ");
+	var query1 = "select * from Category;";
+	mysql.fetchData(function(err, results){
+		req.session.allCategories = results;
+		res.render('activity/addCategory.ejs',{user:req.session.user,allCategories:req.session.allCategories});
+	}, query1);
+}
+function addCategory(req,res){
+	
+	var query = "insert into Category  values ('"+req.param("Category")+"');";
+	console.log(query);
+	mysql.fetchData(function(err, results){
+		if(err){
+			console.log(err);
+		}else{
+		res.render('admin_landing.ejs');
+		}
+	}, query);	
+}
+
+function delCategoryForm(req,res){
+	console.log("I am here ");
+	var query1 = "select * from Category;";
+	mysql.fetchData(function(err, results){
+		req.session.allCategories = results;
+		res.render('activity/deleteCategory.ejs',{user:req.session.user,allCategories:req.session.allCategories});
+	}, query1);
+	//res.render('',{user:req.session.user,allCategories:req.session.allCategories});
+}
+function delCategory(req,res){
+	
+	//insert into shoppingcart values('"+req.session.user.EmailId+"'
+	var query = "delete from Category  where Category = '"+req.param("Category")+"';";
+	console.log(query);
+	mysql.fetchData(function(err, results){
+		if(err){
+			console.log(err);
+		}else{
+		console.log(results);
+		res.render('admin_landing.ejs');
+		}
+	}, query);	
 }
 
 function updateUser(req, res) {
@@ -1083,8 +1172,7 @@ function bidForProduct(req, res) {
 
 	} else {
 		var query = "select * from product where ProductId=" + product_id;
-		mysql
-				.fetchData(
+		mysql.fetchData(
 						function(err, results) {
 							var product = results[0];
 							var bought = 'N';
@@ -1110,6 +1198,7 @@ function bidForProduct(req, res) {
 					                        res.redirect('/browse?message=' + encodeURIComponent('You have placed a bid of ' + bid + ' on ' + product_name));
 				                            }, query1);
 						        }, query);
+						});
 	}
 }
 
@@ -1328,6 +1417,14 @@ exports.advancedSearch = advancedSearch;
 exports.personAdvancedSearch = personAdvancedSearch;
 exports.productAdvancedSearch = productAdvancedSearch;
 exports.viewProduct = viewProduct;
+exports.addCategory=addCategory;
+exports.addCategoryForm = addCategoryForm;
+exports.delCategoryForm = delCategoryForm;
+exports.delCategory = delCategory;
+exports.displayProducts = displayProducts;
+exports.allCustomers= allCustomers;
+exports.allProducts = allProducts;
+exports.allbids = allbids;
 //exports.sellerAfterSignUp = sellerAfterSignUp;
 //exports.placeBid = placeBid;
 
