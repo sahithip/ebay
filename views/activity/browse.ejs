@@ -200,15 +200,9 @@
                 row += "<input type='text' placeholder='bid' name='bid' style='width: 60px; margin-right: 60px;'><button class='btn btn-scnd btn-s' type='submit'>Bid</button>";
             } else {
 
-
-                //row += "<button class='btn btn-prim btn-s' type='submit' style='margin-right: 30px;'>Buy</button>";
-                //row += "<button class='btn btn-prim btn-s' type='submit'>Add To Cart</button>";
-
- 				
-
             	var maxValue = Number(product['AvailableQuantity']);
-            	row += "<input type='number' min =1 max="+maxValue+" value='1' name='quantity' style='width: 75px; margin-right: 40px;'><button name='buyorcart' value='buy' class='btn btn-prim btn-s' type='submit' style='margin-right:20px'>Buy</button><button name='buyorcart' value='cart' class='btn btn-prim btn-s' type='submit'>Add To Cart</button>";
-                  }
+            	row += "<input type='number' min =1 max="+maxValue+" value='1' name='quantity' style='width: 75px; margin-right: 40px;'><button name='buyorcart' value='cart' class='btn btn-prim btn-s' type='submit'>Add To Cart</button>";
+            }
 
             row += "<br>Rating: <input type='radio' name='rating' checked value='1'/> 1 ";
             row += "<input type='radio' name='rating' value='2'/> 2 ";
