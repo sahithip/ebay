@@ -172,10 +172,11 @@
 
         function showProducts(){
             var products = data[current_category] || [];
-            main.innerHTML = '';
+            var html = '';
             for(var i=0; i<products.length; i++){
-                main.innerHTML += productCell(products[i]);
+                html += productCell(products[i]);
             }
+            main.innerHTML = html;
         }
 
         function productCell(product){
