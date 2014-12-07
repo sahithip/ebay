@@ -78,8 +78,13 @@ function signUp(req, res) {
 function signIn(req, res) {
 
 	if (req.session.user) {
-		return res.redirect('/bids/current');
-	}
+		if (req.session.user["UserType"] !="A"){	
+			return res.redirect('/bids/current');
+		}
+		else{
+			res.render("admin_landing.ejs",{user:req.session.user});
+			}}
+		
 
 	ejs.renderFile('./views/signIn.html', {
 		message : req.param('m') || ''
@@ -118,7 +123,12 @@ function doSignIn(req, res) {
 					delete user['Password'];
 					req.session.user = user;
 					req.session.allCategories = catresults;
-					res.redirect('/bids/current');
+					if (req.session.user["UserType"] !="A"){	
+						res.redirect('/bids/current');
+					}
+					else{
+						res.render("admin_landing.ejs",{user:req.session.user});
+					}
 				}
 			}, queryCat);
 		}
@@ -787,11 +797,13 @@ function allSellers(req, res) {
 	var query = "select * from person a inner join (select c.EmailId, avg(rating) as rating from productbid c group by c.EmailId) b on a.EmailId = b.EmailId where a.EmailId in (select distinct SellerEmailId from product)";
 	mysql.fetchData(function(err, results) {
 		console.log(results);
-		res.render('activity/list_sellers.ejs', {
-			allCategories : req.session.allCategories,
-			sellers : results
-		});
-	}, query);
+		if(req.session.user["UserType"]!= "A"){
+						res.render('activity/list_sellers.ejs',{allCategories:req.session.allCategories,sellers: results});
+					}
+					else{
+						res.render('activity/admin_listsellers.ejs',{allCategories:req.session.allCategories,sellers: results});
+					}
+				}, query);
 }
 
 function allbids(req,res){
@@ -821,7 +833,6 @@ function updateUserForm(req, res) {
 function allCustomers(req, res){
 	var query = "select * from person  where UserType='C'";
 	mysql.fetchData(function(err, results){
-		console.log(results);	
 			res.render('activity/admin_listcustomers.ejs',{allCategories:req.session.allCategories,sellers: results});
 	}, query);
 }
@@ -829,13 +840,11 @@ function allCustomers(req, res){
 function allProducts(req,res){
 	var query = "select * from product";
 	mysql.fetchData(function(err, results){
-		console.log(results);	
 			res.render('activity/admin_listproducts.ejs',{allCategories:req.session.allCategories,products: results});
 	}, query);
 }
 
 function addCategoryForm(req,res){
-	console.log("I am here ");
 	var query1 = "select * from Category;";
 	mysql.fetchData(function(err, results){
 		req.session.allCategories = results;
@@ -856,7 +865,6 @@ function addCategory(req,res){
 }
 
 function delCategoryForm(req,res){
-	console.log("I am here ");
 	var query1 = "select * from Category;";
 	mysql.fetchData(function(err, results){
 		req.session.allCategories = results;
@@ -1201,9 +1209,7 @@ function bidForProduct(req, res) {
 	}
 }
 
-function getCategories(callback) {
 
-}
 
 function editProduct(req, res) {
 	var product_id = req.param('p');
