@@ -5,7 +5,7 @@ function getConnection(){
 	return mysql.createConnection({
 	    host     : 'localhost',
 	    user     : 'root',
-	    password : 'root11',
+	    password : '',
 	    database : 'cmpe273project'
 	});
 }
@@ -13,7 +13,7 @@ function getConnection(){
 
 function fetchData(callback,sqlQuery){
 	
-	console.log("\nSQL Query::"+sqlQuery);
+//	console.log("\nSQL Query::"+sqlQuery);
 	
 	var connection=getConnection();
 	
@@ -26,7 +26,7 @@ function fetchData(callback,sqlQuery){
 			callback(err, rows);
 		}
 	});
-	console.log("\nConnection closed..");
+//	console.log("\nConnection closed..");
 	connection.end();
 }	
 

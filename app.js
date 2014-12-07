@@ -37,7 +37,7 @@ app.use(session({
     store: new SessionStore({
         host: 'localhost',
         user: 'root',
-        password: 'root11',
+        password: '',
         database: 'cmpe273project'
     })
 }));
@@ -197,7 +197,9 @@ app.post('/products/add', authenticate, function (req, res) {
     }
     else {
         if (req.param('IsAuction') == "Y") {
-            home.createProduct(req.session.user.EmailId, req.param('ProductName'), req.param('ProductCondition'), req.param('ProductDetails'), req.param('ProductCost'), req.param('Category'), req.param('AvailableQuantity'), req.param('BidStartTime'), req.param('BidEndTime'), req.param('IsAuction'));
+        	var start_time = home.clientDateStringToDateString(req.param('BidStartTime'));
+        	var end_time = home.clientDateStringToDateString(req.param('BidEndTime'));
+            home.createProduct(req.session.user.EmailId, req.param('ProductName'), req.param('ProductCondition'), req.param('ProductDetails'), req.param('ProductCost'), req.param('Category'), req.param('AvailableQuantity'), start_time, end_time, req.param('IsAuction'));
         }
         else {
             home.createProduct(req.session.user.EmailId, req.param('ProductName'), req.param('ProductCondition'), req.param('ProductDetails'), req.param('ProductCost'), req.param('Category'), req.param('AvailableQuantity'), "NA", "NA", req.param('IsAuction'));
@@ -216,7 +218,6 @@ app.post('/fromShoppingCart', authenticate , home.fromShoppingCart);
 app.post('/shoppingCart',authenticate,home.shoppingCart);
 app.get('/shoppingCart',authenticate,home.shoppingCart);
 app.get('/browse', authenticate, home.categoryGroupedListing);
-app.get('/browse', authenticate, home.bidForProduct);
 app.post('/browse', authenticate, home.bidForProduct);
 app.get('/search', authenticate, home.categoryGroupedListing);
 app.get('/advancedSearch',authenticate, home.advancedSearch);

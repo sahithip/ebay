@@ -123,9 +123,9 @@
             <p class="menu-head selected">Categories</p>
             <div style="display: block" class="menu-body">
                 <ul>
-                    <% for(var i=0; i<categories.length; i++) {%>
-                    <li class="sub-menu-li <%=(i==0?'active':'')%>" id="<%=categories[i]%>">
-                        <a onclick="categoryClick('<%=categories[i]%>'); return false;"><%= categories[i] %></a>
+                    <% for(var i=0; i<allCategories.length; i++) {%>
+                    <li class="sub-menu-li <%=(i==0?'active':'')%>" id="<%=allCategories[i].category%>">
+                        <a onclick="categoryClick('<%=allCategories[i].category%>'); return false;"><%= allCategories[i].category %></a>
                     </li>
                     <% } %>
                 </ul>
@@ -133,6 +133,10 @@
         </div>
     </div>
     <div id="main-content">
+        <% var mclass = mclass || 'info';%>
+    <%if (message) { %>
+        <div class="alert alert-<%=mclass%>"><%=message%></div>
+        <% } %>
         <table class="table table-striped table-bordered">
             <thead>
             <tr>
@@ -152,8 +156,7 @@
     <script>
         var main = document.getElementById('main-tbody');
         var data = <%-JSON.stringify(products)%>;
-
-        var current_category = '<%=categories[0]%>';
+        var current_category = '<%=allCategories[0].category%>';
         function categoryClick(category){
             console.log(category);
             var curr = document.getElementById(current_category);
@@ -165,9 +168,7 @@
         }
 
         function showProducts(){
-                console.log(" show Products function executed");
-        
-            var products = data[current_category];
+            var products = data[current_category] || [];
             main.innerHTML = '';
             for(var i=0; i<products.length; i++){
                 main.innerHTML += productCell(products[i]);
@@ -183,8 +184,15 @@
             row += "<td>" + product['Category'] + "</td>";
             row += "<td>$" + product['ProductCost'] + "</td>";
             row += "<td>" + product['AvailableQuantity'] + "</td>";
-            row += "<td>" + product['rating'] + "</td>";
-            row += "<td><form action='/browse' method='POST'><input type='hidden' name='p' value='" + product['ProductId'] +"'/>";
+            
+    var rating;
+    if(product['rating']!=null){
+     rating = product['rating']
+    }else{
+        rating = 'Not Yet Rated';
+    }
+            row += "<td>" + rating + "</td>";
+            row += "<td><form action='/browse' method='POST'><input type='hidden' name='p' value='" + product['ProductId'] +"'/><input type='hidden' name='pname' value='" + product['ProductName'] + "'/>";
             if(product['IsAuction'].toLowerCase() === 'y'){
                 row += "<input type='text' placeholder='bid' name='bid' style='width: 60px; margin-right: 60px;'><button class='btn btn-scnd btn-s' type='submit'>Bid</button>";
             } else {

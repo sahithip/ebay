@@ -1,10 +1,42 @@
 var ejs = require("ejs");
 //var mysql = require('./mysql.js');
 var mysql = require('./mysql_withpool.js');
+
+//var CronJob = require('cron').CronJob;
 function getDateTime() {
+	return dateString(new Date());
+}
 
-	var date = new Date();
 
+function dateFromString(s){
+	var parts = s.split(':');
+	var date = new Date(parts[0], parts[1]-1, parts[2], parts[3], parts[4], parts[5]);
+	return date;
+}
+
+
+function localAsUTCDate(d){
+	var tz_offset = d.getTimezoneOffset();
+	var time = d.getTime();
+	var utc = time + tz_offset * 60000;
+	var date = new Date(0);
+	date.setUTCMilliseconds(utc);
+	return date;
+}
+
+
+function utcAsLocalDate(d){
+	var tz_offset = d.getTimezoneOffset();
+	var time = d.getTime();
+	var utc = time - tz_offset * 60000;
+	var date = new Date(0);
+	date.setUTCMilliseconds(utc);
+	return date;
+}
+
+
+function dateString(date){
+	
 	var hour = date.getHours();
 	hour = (hour < 10 ? "0" : "") + hour;
 
@@ -23,8 +55,14 @@ function getDateTime() {
 	day = (day < 10 ? "0" : "") + day;
 
 	return year + ":" + month + ":" + day + ":" + hour + ":" + min + ":" + sec;
-
 }
+
+
+function clientDateStringToDateString(client_date_string){
+	var date = localAsUTCDate(new Date(client_date_string));
+	return dateString(date);
+}
+
 
 function signUp(req, res) {
 
@@ -343,11 +381,11 @@ function displayPersonDetails(req, res) {
 
 function connect() {
 	var connection = mysqlDhanu.createConnection({
-		host : 'localhost',
-		user : 'root',
-		password : 'root',
-		// password : '',
-		database : 'cmpe273project' // 'eBay'
+		host     : 'localhost',
+		user     : 'root',
+		//password : 'root',
+		password : '',
+		database: 'cmpe273project' //'eBay'
 	});
 
 	connection.connect();
@@ -418,7 +456,42 @@ function createProduct(SellerEmail, ProductName, ProductCondition,
 			console.log("ERROR: " + eerr.message);
 		} else {
 			console.log("Products:" + JSON.stringify(eRows));
-
+			
+			// Create the cron job if this product is a bid
+//			if(AuctionFlag === 'Y'){
+//				var end_dt = utcAsLocalDate(dateFromString(BidEndTime));
+//				var now = new Date();
+//				if(end_dt > now){
+//					console.log('Creating a cron job for the biddable product');
+//					var job = new CronJob(end_dt, function(){
+//						var product_id = eRows.insertId;
+//						console.log('Cronjob kicked off for product with id ' + product_id);
+//						var bids_query = "select * from productbid where ProductId=" + product_id;
+//						mysql.fetchData(function(err, results){
+//							if(err){
+//								console.log(err);
+//								return;
+//							}
+//							var best_bid = null;
+//							var max_bid_price = -1;
+//							for(var i=0; i<results.length; i++){
+//								if(results[i]['BidPrice'] > max_bid_price){
+//									best_bid = results[i];
+//									max_bid_price = best_bid['BidPrice'];
+//								}
+//							}
+//							var update_query = "update productbid set BoughtFlag='Y' where ProductId=" + product_id + " and EmailId='" + best_bid['EmailId'] + "' and BidPrice=" + max_bid_price;
+//							mysql.fetchData(function(err, results){
+//								if(err){
+//									console.log(err);
+//									return;
+//								}
+//								console.log('Successfully completed bid');
+//							}, udpate_query);
+//						}, bids_query);
+//					});
+//				}
+			//}
 		}
 
 	});
@@ -891,10 +964,10 @@ function productAdvancedSearch(req, res) {
 function categoryGroupedListing(req, res) {
 	var search_query = req.param('q');
 	var category = req.param('category');
-	if (category == "all")
-		category = 0;
-	var query = "select * from product a inner join (select ProductId, avg(rating) as rating from productbid group by ProductId) b on a.ProductId = b.ProductId";
-	if (search_query || category) {
+	if(category == "all") category = 0;
+	var time = getDateTime();
+	var query = "select a.ProductId,ProductName,ProductCondition,ProductDetails,ProductCost,Category,AvailableQuantity,BidStartTime,BidEndTime,IsAuction,SellerEmailId,DeletedBySeller,rating from (select * from cmpe273project.product where DeletedBySeller = 'N' and BidEndTime < '" + time + "') a left join (select ProductId, avg(rating) as rating from cmpe273project.productbid group by ProductId) b on a.ProductId = b.ProductId";
+	if(search_query || category){
 		query += " where ";
 	}
 	if (search_query) {
@@ -910,28 +983,28 @@ function categoryGroupedListing(req, res) {
 		query += "category = '" + category + "'";
 	}
 
-	mysql.fetchData(function(err, results) {
-		console.log(results);
-		var products = {
-			'All' : []
-		};
-		for (var i = 0; i < results.length; i++) {
-			if (!products.hasOwnProperty(results[i].category)) {
+	mysql.fetchData(function(err, results){
+		var products = {'All': []};
+		for(var i=0; i<results.length; i++){
+			if(typeof(products[results[i]['Category']]) === 'undefined' || !products.hasOwnProperty(results[i].category)){
 				products[results[i]['Category']] = [];
 			}
 			products[results[i]['Category']].push(results[i]);
 			products['All'].push(results[i]);
+
 		}
-		res.render('activity/browse.ejs', {
-			allCategories : req.session.allCategories,
-			products : products,
-			categories : Object.keys(products).sort()
+		res.render('activity/browse.ejs',{
+			allCategories: req.session.allCategories,
+			products: products,
+			categories: Object.keys(products).sort(),
+			message: req.param('message')
 		});
 	}, query);
 }
 
 function bidForProduct(req, res) {
 	var product_id = req.param('p');
+	var product_name = req.param('pname');
 	var bid = req.param('bid');
 	var rating = req.param('rating');
 	var buyorcart = req.param('buyorcart');
@@ -1032,14 +1105,11 @@ function bidForProduct(req, res) {
 									+ product_id + ", " + bid + ", '" + bought
 									+ "', " + req.param('quantity') + " , "
 									+ rating + ")";
-							mysql.fetchData(function(err, results) {
-								res.redirect('/browse', {
-									allCategories : req.session.allCategories
-								});
-							}, query);
-							mysql.fetchData(function(err, result) {
-							}, query1);
-						}, query);
+							mysql.fetchData(function(err, results){
+				                            mysql.fetchData(function(err,result){
+					                        res.redirect('/browse?message=' + encodeURIComponent('You have placed a bid of ' + bid + ' on ' + product_name));
+				                            }, query1);
+						        }, query);
 	}
 }
 
@@ -1210,6 +1280,7 @@ function thankYou(req, res) {
 	});
 }
 
+
 exports.thankYou = thankYou;
 exports.fromShoppingCart = fromShoppingCart;
 exports.shoppingCart = shoppingCart;
@@ -1243,6 +1314,8 @@ exports.updateUser = updateUser;
 exports.bidForProduct = bidForProduct;
 exports.editProduct = editProduct;
 exports.modifyProduct = modifyProduct;
+exports.clientDateStringToDateString = clientDateStringToDateString;
+exports.dateFromString = dateFromString;
 
 exports.sellerSignUp = sellerSignUp;
 exports.sellerSignIn = sellerSignIn;
@@ -1255,6 +1328,87 @@ exports.advancedSearch = advancedSearch;
 exports.personAdvancedSearch = personAdvancedSearch;
 exports.productAdvancedSearch = productAdvancedSearch;
 exports.viewProduct = viewProduct;
-// exports.sellerAfterSignUp = sellerAfterSignUp;
-// exports.placeBid = placeBid;
+//exports.sellerAfterSignUp = sellerAfterSignUp;
+//exports.placeBid = placeBid;
 
+
+function setLastRun(ts_string){
+	var query = "insert into keyvaluestore (KeyString, ValueString) values ('LastBidCheck', '" + ts_string + "')";
+	query += "on duplicate key update ValueString='" + ts_string + "'";
+	mysql.fetchData(function(err, results){
+		if(err){
+			console.log(err);
+			return;
+		}
+	}, query);
+}
+
+
+function getLastRun(callback){
+	var query = "select * from keyvaluestore where KeyString='LastBidCheck'";
+	mysql.fetchData(function(err, results){
+		if(err){
+			console.log(err);
+			callback(null);
+		} else if(results.length == 0){
+			callback(null);
+		} else {
+			callback(results[0]['ValueString']);
+		}
+	}, query);
+}
+
+
+function evaluateBids(product_id){
+	var bids_query = "select * from productbid where ProductId=" + product_id;
+	mysql.fetchData(function(err, results){
+		if(err){
+			console.log(err);
+			return;
+		}
+		if(results.length == 0){
+			console.log('No bids for the product with id: ' + product_id);
+			return;
+		}
+		var best_bid = null;
+		var max_bid_price = -1;
+		for(var i=0; i<results.length; i++){
+			if(results[i]['BidPrice'] > max_bid_price){
+				best_bid = results[i];
+				max_bid_price = best_bid['BidPrice'];
+			}
+		}
+		var update_query = "update productbid set BoughtFlag='Y' where ProductId=" + product_id + " and EmailId='" + best_bid['EmailId'] + "' and BidPrice=" + max_bid_price;
+		mysql.fetchData(function(err, results){
+			if(err){
+				console.log(err);
+				return;
+			}
+			console.log('Successfully completed bid for ProductId: ' + product_id);
+		}, update_query);
+	}, bids_query);
+}
+
+
+function kickOffBidWrapups(){
+	getLastRun(function(last_run){
+		if(last_run == null){
+			last_run = dateString(new Date(0));
+		}
+		var time_str = getDateTime();
+		var ready_products = "select * from cmpe273project.product where BidEndTime between '" + last_run + "' and '" + time_str + "' and IsAuction='Y'";
+		mysql.fetchData(function(err, results){
+			if(err){
+				console.log(err);
+				return;
+			}
+			for(var i=0; i<results.length; i++){
+				evaluateBids(results[i]['ProductId']);
+			}
+			setLastRun(time_str);
+		}, ready_products);
+	});
+}
+
+
+setInterval(kickOffBidWrapups, 3000);
