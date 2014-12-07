@@ -758,6 +758,7 @@ function waitingProducts(req, res) {
 			+ email
 			+ "' and ProductId not in (select ProductId from productbid where ProductId in (select ProductId from product where EmailId = '"
 			+ email + "') and lower(BoughtFlag) = 'y')";
+	
 	mysql.fetchData(function(err, results) {
 		console.log(results);
 		res.render('activity/products_waiting.ejs', {
@@ -1060,7 +1061,7 @@ function categoryGroupedListing(req, res) {
 	var category = req.param('category');
 	if(category == "all") category = 0;
 	var time = getDateTime();
-	var query = "select a.ProductId,ProductName,ProductCondition,ProductDetails,ProductCost,Category,AvailableQuantity,BidStartTime,BidEndTime,IsAuction,SellerEmailId,DeletedBySeller,rating from (select * from cmpe273project.product where DeletedBySeller = 'N' and (BidEndTime < '" + time + "' or BidEndTime = 'NA')) a left join (select ProductId, avg(rating) as rating from cmpe273project.productbid group by ProductId) b on a.ProductId = b.ProductId";
+	var query = "select a.ProductId,ProductName,ProductCondition,ProductDetails,ProductCost,Category,AvailableQuantity,BidStartTime,BidEndTime,IsAuction,SellerEmailId,DeletedBySeller,rating from (select * from cmpe273project.product where DeletedBySeller = 'N' and (BidEndTime > '" + time + "' or BidEndTime = 'NA')) a left join (select ProductId, avg(rating) as rating from cmpe273project.productbid group by ProductId) b on a.ProductId = b.ProductId";
 	if(search_query || category){
 		query += " where ";
 	}
