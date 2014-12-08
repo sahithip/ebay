@@ -155,12 +155,16 @@
             </thead>
             <tbody id="main-tbody">
             <% for(var i=0; i<sellers.length; i++) {%>
+                <%  var rating = sellers[i]['rating'];
+                    if(rating===null)
+                    { rating ='Not yet Rated';
+                    }%>
             <tr>
                 <td><%-sellers[i]['FirstName']%></td>
                 <td><%-sellers[i]['LastName']%></td>
                 <td><%-sellers[i]['EmailId']%></td>
                 <td><%-sellers[i]['Address'] + ', ' + sellers[i]['City'] + ', ' + sellers[i]['State']%></td>
-                <td><%-sellers[i]['rating']%></td>
+                <td><%-rating%></td>
             </tr>
             <% } %>
             </tbody>

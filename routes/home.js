@@ -929,7 +929,7 @@ function boughtProducts(req, res) {
 }
 
 function allSellers(req, res) {
-	var query = "select * from person a inner join (select c.EmailId, avg(rating) as rating from productbid c group by c.EmailId) b on a.EmailId = b.EmailId where a.EmailId in (select distinct SellerEmailId from product)";
+	var query = "select a.FirstName,a.LastName,a.EmailId,a.Address,a.City,a.State,b.rating from person a left join (select c.EmailId, avg(rating) as rating from productbid c group by c.EmailId) b on a.EmailId = b.EmailId where a.EmailId in (select distinct SellerEmailId from product)";
 	mysql.fetchData(function(err, results) {
 		console.log(results);
 		if(req.session.user["UserType"]!= "A"){
