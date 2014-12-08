@@ -65,7 +65,9 @@ function clientDateStringToDateString(client_date_string){
 
 
 function signUp(req, res) {
-	ejs.renderFile('./views/Register.html', function(err, result) {
+	ejs.renderFile('./views/Register.html', 
+			{message : req.param('m') || ''},
+			function(err, result) {
 		if (!err) {
 			res.end(result);
 		} else {
@@ -213,38 +215,45 @@ function afterSignIn(req, res) {
 function afterSignUp(req, res) {
 	var current_Date_Time = getDateTime();
 
-	var getUser = 'insert into person(EmailId,Password,FirstName,LastName,Address,City,State,ZipCode,LastLogin,UserType) values ("'
-			+ req.param("inputEmail")
-			+ '", "'
-			+ req.param("inputPassword")
-			+ '","'
-			+ req.param("inputFirstName")
-			+ '", "'
-			+ req.param("inputLastName")
-			+ '", "'
-			+ req.param("inputAddress")
-			+ '","'
-			+ req.param("inputCity")
-			+ '", "'
-			+ req.param("inputState")
-			+ '", "'
-			+ req.param("inputZipcode")
-			+ '", "'
-			+ current_Date_Time
-			+ '", "' + 'C' + '")';
+	validateSignUp(req.param("inputPassword") , req.param("inputFirstName") ,req.param("inputLastName"), req.param("inputEmail"), req.param("inputState"), req.param("inputZipcode"), function(result){
 
-	console.log("Query is:" + getUser);
+		if(result == "success"){
+			var getUser = 'insert into person(EmailId,Password,FirstName,LastName,Address,City,State,ZipCode,LastLogin,UserType) values ("'
+				+ req.param("inputEmail")
+				+ '", "'
+				+ req.param("inputPassword")
+				+ '","'
+				+ req.param("inputFirstName")
+				+ '", "'
+				+ req.param("inputLastName")
+				+ '", "'
+				+ req.param("inputAddress")
+				+ '","'
+				+ req.param("inputCity")
+				+ '", "'
+				+ req.param("inputState")
+				+ '", "'
+				+ req.param("inputZipcode")
+				+ '", "'
+				+ current_Date_Time
+				+ '", "' + 'C' + '")';
 
-	mysql.fetchData(function(err, results) {
-		if (err) {
-			throw err;
-		} else {
-			res.redirect('/signIn');
+			console.log("Query is:" + getUser);
+
+			mysql.fetchData(function(err, results) {
+				if (err) {
+					throw err;
+				} else {
+					res.redirect('/signIn');
+				}
+			}, getUser);
+		}else {
+			 res.redirect('/signUp?m='
+					+ 'SignUp Error');
 		}
-	}, getUser);
+	});
 
 }
-
 function sellProduct(req, res) {
 
 	var getUser = 'update product set AvailableQuantity="'
@@ -1006,17 +1015,17 @@ function validateSignUp(password, fname, lname, email , state, zipCode, callback
 	if((fname == "") || (lname == "")){
 		console.log("FirstName and LastName should not be null");
 		callback("fail");
-	}else if(!fname.matches("^[A-Za-z]+$") || !lname.matches("^[A-Za-z]+$") || !state.matches("^[A-Za-z]+$")){
-		console.log("FirstName and LastName should contain only Alphabets");
-		callback("fail");
+
 	}
-	else if(fname.length() < 2 || fname.length() > 30 || lname.length() < 2 || lname.length() > 30){
-		console.log("Name should between 2 to 30 characters only")
+	else if(fname.length < 2 || fname.length > 30 || lname.length < 2 || lname.length > 30){
+		console.log("Name should between 2 to 30 characters only");
 		callback("fail");
+
 	}
-	else if(!zipCode.matches("\d{5}([\-]\d{4})?")){
+	else if(!zipCode.match("\d{5}([\-]\d{4})?")){
 		console.log("Invalid ZipCode");
 		callback("fail");
+
 	}
 	else if(email == ""){
 		console.log("Email should not be null");
@@ -1028,44 +1037,39 @@ function validateSignUp(password, fname, lname, email , state, zipCode, callback
 	}
 	// second check :
 	else if (indexOfAt < 2) {
-		console.log ("Invalid emailid");
+		console.log("Invalid emailid");
 		callback("fail");
+
 	}
 	// third check :
-	else if (indexOfLastDot < indexOfAt || indexOfLastDot != (email.length() - 4)) {
+	else if (indexOfLastDot < indexOfAt || indexOfLastDot != (email.length - 4)) {
 		console.log( "Invalid emailid");
 		callback("fail");
+
 	}
-	else if (validateIdnPassword(email,password,function(result){
-
-		if(result == "fail"){
-			console.log("email or Password must not be empty");
-			callback("fail");
-		}else if(password.length() < 8 || password.length() > 30){
-			console.log("Password must be min 8 characters and max 30 characters");
-			callback("fail");
-		}
-	})){
-
-	}else {
+	else if(password.length < 8 || password.length > 30){
+		console.log("Password must be min 8 characters and max 30 characters");
+		callback("fail");
+	}
+	else {
 		callback("success");
 	}
 }
 
 function validateUpdateUser(fname, lname, state, zipCode, callback){
-	
+
 	if((fname == "") || (lname == "")){
 		console.log("FirstName and LastName should not be null");
 		callback("fail");
-	}else if(!fname.matches("^[A-Za-z]+$") || !lname.matches("^[A-Za-z]+$") || !state.matches("^[A-Za-z]+$")){
+	}else if(!fname.match("^[A-Za-z]+$") || !lname.match("^[A-Za-z]+$") || !state.match("^[A-Za-z]+$")){
 		console.log("FirstName and LastName should contain only Alphabets");
 		callback("fail");
 	}
-	else if(fname.length() < 2 || fname.length() > 30 || lname.length() < 2 || lname.length() > 30){
+	else if(fname.length < 2 || fname.length > 30 || lname.length < 2 || lname.length > 30){
 		console.log("Name should between 2 to 30 characters only")
 		callback("fail");
 	}
-	else if(!zipCode.matches("\d{5}([\-]\d{4})?")){
+	else if(!zipCode.match("\d{5}([\-]\d{4})?")){
 		console.log("Invalid ZipCode");
 		callback("fail");
 	}

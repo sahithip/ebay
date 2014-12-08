@@ -76,8 +76,9 @@
                             <td class="gh-td" id="gh-cat-td">
                                 <div id="gh-cat-box">
                                     <select title="Select a category for search" class="gh-sb gh-sprRetina" size="1" id="gh-cat" name="category">
-                                          <option value ="Select a category">Select a category</option>
+                                    	<option value ="Select a category">Select a category</option>
                                        <%for(var cat =0;cat<allCategories.length;cat++){%>
+                                       
                                        <option value="<%=allCategories[cat].category%>"><%=allCategories[cat].category%></option>
                                        <%}%>
                                     </select>
