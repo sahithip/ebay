@@ -10,8 +10,26 @@
 <link
 	href="https://secureir.ebaystatic.com/rs/v/ryt1iptmaazydbfqvfb5q025xe4.css"
 	type="text/css" rel="stylesheet">
-</head>
+	
+	
+<script language="JavaScript">
+function fmtssn()
+{
+re = /\D/g; // remove any characters that are not numbers
+socnum=document.ppaRegForm.SSNNumber.value.replace(re,"")
+sslen=socnum.length
+ssa=socnum.slice(0,3)
+ssb=socnum.slice(3,6)
+ssc=socnum.slice(6,10)
+document.ppaRegForm.SSNNumber.value=ssa+"-"+ssb+"-"+ssc
+	
+}
+</script>
+	
+	
+	</head>
 <body>
+	
 	<div class="sz980">
 		<div class="pgWidth" id="pgWidth">
 			<!--[if lt IE 9]><link rel="stylesheet" type="text/css" href="https://secureir.ebaystatic.com/rs/v/32q2wauokmyjletm4byq40w5s2i.css?proc=DU:N"><![endif]-->
@@ -49,6 +67,10 @@
 				<a tabindex="-1"  style="top: 0px; left: -9999px; position: absolute;">Get
 					started with eBay</a>
 			</h1>
+				<% var mclass = mclass || 'info';%>
+	    <%if (message) { %>
+	        <div class="alert alert-<%=mclass%>"><%=message%></div>
+	        <% } %>
 			<noscript>&lt;div class="pdt10"&gt;&lt;div class="sm-co
 				sm-er"&gt;&lt;i class="gspr icer"&gt;&lt;/i&gt;&lt;p&gt; You must
 				have Java Script enabled to register. &lt;a
@@ -215,6 +237,20 @@
 														<div role="alert" aria-live="assertive">
 															<div id="zipcode_w" class="rdn">Please enter your
 																zip code.</div>
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class="rfl" id="membership_id">
+												<div class="fv-w">
+													<label for="membership_id">SSN Number</label>
+													<div class="fv-tw ">
+														<input maxlength="12" minlength="10" type="text" name="SSNNumber"
+															Placeholder = "000-000-0000" id="SSNNumber" size="32" class="w242" v="1"
+															t="1" a="1" aria-autocomplete="none" aria-required="true" required="true" onKeyPress =fmtssn() >
+														<div role="alert" aria-live="assertive">
+															<div id="membership_id" class="rdn">Please enter your
+																SSN Number.</div>
 														</div>
 													</div>
 												</div>

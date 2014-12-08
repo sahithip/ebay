@@ -2,6 +2,14 @@ var ejs = require("ejs");
 var mysqlconnection = require('mysql');
 var mysql = require('./mysql_withpool.js');
 
+//var redis = require("redis"), client = redis.createClient();
+
+//client.on("error", function(err) { 
+
+//console.log("Error " + err);
+
+//});
+
 //var CronJob = require('cron').CronJob;
 function getDateTime() {
 	return dateString(new Date());
@@ -78,7 +86,8 @@ function signUp(req, res) {
 }
 
 function signIn(req, res) {
-
+	
+	
 	if (req.session.user) {
 		if (req.session.user["UserType"] !="A"){	
 			return res.redirect('/bids/current');
@@ -87,7 +96,7 @@ function signIn(req, res) {
 			res.render("admin_landing.ejs",{user:req.session.user});
 			}}
 		
-
+	console.log("Here----");
 	ejs.renderFile('./views/signIn.html', {
 		message : req.param('m') || ''
 	}, function(err, result) {
@@ -147,7 +156,97 @@ function doSignIn(req, res) {
 	} 
 });
 }
+
+// WITH CACHING:
+/*function doSignIn(req, res){
+	var email = req.param("inputEmail");
+	var password = req.param("inputPassword");
+
+	var query = "select * from person where EmailId='"+email+"' and password='" + password + "'";
+	var queryCat = "select * from category";
+
+	validateSignIn(email,password, function(result) {
+
+	if( password.indexOf("'")!=-1 || password.indexOf(" ")!=-1 || password.indexOf("\"")!=-1 || email.indexOf("'")!=-1 || email.indexOf(" ")!=-1 || email.indexOf("\"")!=-1)
+		{
+		console.log("sql injection error");
+		return res.redirect('/signIn?m=' + 'SQL injection tried!!!!');
+
+		}
+	else{
 	
+	mysql.fetchData(function(err, results) {
+		if (err) {
+			throw err;
+		} else {
+		
+				client.get("CategoryCache", function(err, reply) {
+				if (reply === null) {
+					// if not cached
+					console.log("Data not available in cache!");
+					// cache SQL result, set cache(key,value)
+					
+					mysql.fetchData(function(caterr, catresults) {
+						if (caterr) {
+							throw caterr;
+						} else {
+					
+					if(!results.length){
+						return res.redirect('/signIn?m=' + 'Invalid Credentials');
+					}
+					var user = results[0];
+					delete user['Password'];
+					req.session.user = user;
+					req.session.allCategories = catresults;
+
+					res.redirect('/bids/current');
+					if (req.session.user["UserType"] !="A"){	
+						res.redirect('/bids/current');
+					}
+					else{
+						res.render("admin_landing.ejs",{user:req.session.user});
+					}
+
+					
+					
+					client.set("CategoryCache",  JSON.stringify(catresults));
+					console.log("Fetching categories  from DB");
+					console.log(JSON.stringify(catresults));
+					
+						}
+					},queryCat);	
+				}else {
+					// if cached
+					console.log("Found data from cache!");
+					console.log(" reply " +JSON.parse(reply));
+					var cacheResults=JSON.parse(reply);
+					if(!cacheResults.length){
+						return res.redirect('/signIn?m=' + 'Invalid Credentials');
+					}
+					
+					var user = cacheResults[0];
+					delete user['Password'];
+					req.session.user = user;
+					req.session.allCategories = JSON.parse(reply);
+					console.log(req.session.allCategories);
+						
+						if (req.session.user["UserType"] !="A"){	
+								res.redirect('/bids/current');
+							}
+							else{
+								res.render("admin_landing.ejs",{user:req.session.user});
+							}
+
+		          }
+				});
+		} //else for mysql fetch data
+	
+	}, query);
+	}
+	});
+}
+*/
+
 function signOut(req, res) {
 	req.session.destroy();
 	res.redirect('/');
@@ -215,10 +314,10 @@ function afterSignIn(req, res) {
 function afterSignUp(req, res) {
 	var current_Date_Time = getDateTime();
 
-	validateSignUp(req.param("inputPassword") , req.param("inputFirstName") ,req.param("inputLastName"), req.param("inputEmail"), req.param("inputState"), req.param("inputZipcode"), function(result){
+	validateSignUp(req.param("inputPassword") , req.param("inputFirstName") ,req.param("inputLastName"), req.param("inputEmail"), req.param("inputState"), req.param("inputZipcode"),req.param("SSNNumber").replace(/[^0-9]/g,''), function(result){
 
 		if(result == "success"){
-			var getUser = 'insert into person(EmailId,Password,FirstName,LastName,Address,City,State,ZipCode,LastLogin,UserType) values ("'
+			var getUser = 'insert into person(EmailId,Password,FirstName,LastName,Address,City,State,ZipCode,LastLogin,UserType,MembershipNo) values ("'
 				+ req.param("inputEmail")
 				+ '", "'
 				+ req.param("inputPassword")
@@ -233,21 +332,36 @@ function afterSignUp(req, res) {
 				+ '", "'
 				+ req.param("inputState")
 				+ '", "'
-				+ req.param("inputZipcode")
+				+ req.param("inputZipcode").replace(/[^0-9]/g,'')
 				+ '", "'
 				+ current_Date_Time
-				+ '", "' + 'C' + '")';
+				+ '", "' 
+				+ 'C'
+				+ '","'
+				+req.param("SSNNumber").replace(/[^0-9]/g,'')
+				+ '")';
 
 			console.log("Query is:" + getUser);
-
+			var query1 = "select * from Person where Emailid = '"+req.param("inputEmail")+"';";
 			mysql.fetchData(function(err, results) {
 				if (err) {
 					throw err;
 				} else {
-					res.redirect('/signIn');
+					if (!results){
+						mysql.fetchData(function(err, results) {
+							if (err) {
+								throw err;
+							}
+						}, getUser);
 				}
-			}, getUser);
-		}else {
+					else{
+						res.redirect('/signUp?m='
+								+ 'Already Registered');
+					}
+					}
+			}, query1);
+		}
+		else {
 			 res.redirect('/signUp?m='
 					+ 'SignUp Error');
 		}
@@ -309,7 +423,7 @@ function displayProduct(req, res) {
 function viewProduct(req, res) {
 
 	var getUser = "select * from ProductBid a right join Product b on a.ProductId = b.ProductId where b.ProductName = '"
-			+ req.params.ProductName + "'";
+			+ req.params.ProductName + "' and b.availablequantity>0 and a.quantity>0";
 	console.log("Query is:" + getUser);
 
 	mysql.fetchData(function(err, results) {
@@ -750,10 +864,10 @@ function wonBids(req, res) {
 			+ "' and lower(b.IsAuction) = 'y' and lower(a.BoughtFlag) = 'y'";
 	mysql.fetchData(function(err, results) {
 		console.log(results);
-		res.render('activity/bids_won.ejs', {
+		/*res.render('activity/bids_won.ejs', {
 			allCategories : req.session.allCategories,
 			bids : results
-		});
+		});*/
 	}, query);
 }
 
@@ -826,6 +940,55 @@ function allSellers(req, res) {
 					}
 				}, query);
 }
+
+/*function allSellers(req, res) {
+	var query = "select * from person a inner join (select c.EmailId, avg(rating) as rating from productbid c group by c.EmailId) b on a.EmailId = b.EmailId where a.EmailId in (select distinct SellerEmailId from product)";
+	
+	
+	client.get("SellerCache", function(err, reply) {
+		if (reply === null) {
+			// if not cached
+			console.log("no cache");
+			// cache SQL result, set cache(key,value)
+			
+			
+			mysql.fetchData(function(err, results) {
+				console.log(results);
+				client.set("SellerCache",  JSON.stringify(results));
+
+				
+				
+				if(req.session.user["UserType"]!= "A"){
+					res.render('activity/list_sellers.ejs',{allCategories:req.session.allCategories,sellers: results});
+				}
+				else{
+					res.render('activity/admin_listsellers.ejs',{allCategories:req.session.allCategories,sellers: results});
+				}
+				
+				console.log("get sellerInfo from DB");
+
+			}, query);
+				
+		}else {
+			// if cached
+			console.log("get Seller info from cache");
+			//console.log(" reply " +JSON.parse(reply));
+			
+			res.render('activity/list_sellers.ejs', {
+				allCategories : req.session.allCategories,
+				sellers : JSON.parse(reply)
+			}); 
+			
+			if(req.session.user["UserType"]!= "A"){
+				res.render('activity/list_sellers.ejs',{allCategories:req.session.allCategories,sellers: JSON.parse(reply)});
+			}
+			else{
+				res.render('activity/admin_listsellers.ejs',{allCategories:req.session.allCategories,sellers: JSON.parse(reply)});
+			}	
+		}	
+		});
+}
+*/
 
 function allbids(req,res){
 	var query = "select * from Product where IsAuction = 'Y';";
@@ -912,17 +1075,18 @@ function updateUser(req, res) {
 	var selection = req.param('updateordelete');
 
 	if (selection == 'update') {
-
-		validateUpdateUser(req.param("FirstName") ,req.param("LastName"), req.param("State"), req.param("Zipcode"), function(result){
+		//console.log(req.param("ZipCode").replace(/[^0-9]/g,''));
+		validateUpdateUser(req.param("FirstName") ,req.param("LastName"), req.param("State"), req.param("ZipCode"), function(result){
 			if(result == "success"){		
 				var query = "update person set FirstName='" + req.param('FirstName')
 				+ "', LastName='" + req.param('LastName') + "', ";
 				query += "Address='" + req.param('Address') + "', City='"
 				+ req.param('City') + "', State='" + req.param('State')
-				+ "', ZipCode=" + req.param('ZipCode');
+				+ "', ZipCode=" + req.param('ZipCode').replace(/[^0-9]/g,'');
 				query += " where EmailId='" + req.session.user.EmailId + "'";
 				var afterUpdateDetails = "select * from person where EmailId='"
 					+ req.session.user.EmailId + "'";
+				console.log(query);
 				var mclass, message;
 				mysql.fetchData(function(err, results) {
 
@@ -960,7 +1124,7 @@ function updateUser(req, res) {
 			}else {
 				mclass = 'danger';
 				message = 'Invalid form data';
-				res.render('activity/account.ejs', {mclass: mclass, message: message});
+				res.render('activity/account.ejs', {allCategories: req.session.allCategories, mclass: mclass, message: message});
 			}
 		});
 	} else {
@@ -1009,20 +1173,28 @@ function validateSignIn (userName , password, callback){
 }
 
 
-function validateSignUp(password, fname, lname, email , state, zipCode, callback){
+function validateSignUp(password, fname, lname, email , state, zipCode,ssnnumber, callback){
+	console.log(fname);
+	
 	var indexOfAt = email.indexOf('@');
 	var indexOfLastDot = email.lastIndexOf('.');
 	if((fname == "") || (lname == "")){
 		console.log("FirstName and LastName should not be null");
 		callback("fail");
-
 	}
+	if(ssnnumber =="" || ssnnumber.length <10 || ssnnumber.length>12){
+		console.log("Invalid SSN Number");
+		callback("fail");
+	}
+	
 	else if(fname.length < 2 || fname.length > 30 || lname.length < 2 || lname.length > 30){
+		console.log(fname.length);
 		console.log("Name should between 2 to 30 characters only");
 		callback("fail");
 
 	}
-	else if(!zipCode.match("\d{5}([\-]\d{4})?")){
+	//else if(!zipCode.match("\d{5}([\-]\d{4})?")){
+	else if(!zipCode.match("^\\d{5}(-\\d{4})?$")){
 		console.log("Invalid ZipCode");
 		callback("fail");
 
@@ -1069,7 +1241,8 @@ function validateUpdateUser(fname, lname, state, zipCode, callback){
 		console.log("Name should between 2 to 30 characters only")
 		callback("fail");
 	}
-	else if(!zipCode.match("\d{5}([\-]\d{4})?")){
+	//else if(!zipCode.match("\d{5}([\-]\d{4})?") )){
+	else if(!zipCode.match("^\\d{5}(-\\d{4})?$")){
 		console.log("Invalid ZipCode");
 		callback("fail");
 	}
@@ -1136,21 +1309,28 @@ function personAdvancedSearch(req, res) {
 function productAdvancedSearch(req, res) {
 	var message = "product";
 	var bidsOnly = req.param("IsBid");
-	var query = "select * from product where ProductName like'%"
+	/*var query = "select * from product where ProductName like'%"
 			+ req.param('ProductName') + "%' and ProductCondition like '%"
 			+ req.param('ProductCondition') + "%' and Category like '%"
-			+ req.param('Category') + "%'";
+			+ req.param('Category') + "%'";*/
+	
 	
 	var categoryType =req.param('Category');
 	var productCondition = req.param('ProductCondition');
 	
 	if(req.param('Category') == 'Select a category'){	
-		category = '';
+		categoryType = '';
 	}
 	
 	if(req.param('ProductCondition') == 'Any'){	
 		productCondition = '';
 	}
+	
+	var query = "select * from product where ProductName like'%"
+		+ req.param('ProductName') + "%' and ProductCondition like '%"
+		+ productCondition + "%' and Category like '%"
+		+ categoryType + "%'";
+	
 	
 	if (bidsOnly == "Yes") {
 		query = query + "and IsAuction = 'Y' ";
@@ -1176,6 +1356,7 @@ function productAdvancedSearch(req, res) {
 }
 
 function categoryGroupedListing(req, res) {
+	console.log("Here--");
 	var search_query = req.param('q');
 	var category = req.param('category');
 	if(category == "all") category = 0;
@@ -1207,12 +1388,12 @@ function categoryGroupedListing(req, res) {
 			products['All'].push(results[i]);
 
 		}
-		res.render('activity/browse.ejs',{
+		/*res.render('activity/browse.ejs',{
 			allCategories: req.session.allCategories,
 			products: products,
 			categories: Object.keys(products).sort(),
 			message: req.param('message')
-		});
+		});*/
 	}, query);
 }
 

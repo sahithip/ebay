@@ -246,6 +246,7 @@
                 <label class="control-label col-xs-2">Category: </label>
                 <div class="col-xs-6">
                    <select id="Category" name="Category">
+                    <option value ="Select a category">Select a category</option>
                    <% for(var cat = 0 ;cat < categories.length;cat++){%>
                     <option value ="<%=categories[cat].category%>"><%=categories[cat].category%> </option>
                    <%}%>

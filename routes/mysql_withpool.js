@@ -8,7 +8,6 @@ function getConnection(){
 	    host     : 'localhost',
 	    user     : 'root',
 	    password : '',
-
 	    database : 'cmpe273project'
 	});
 	connection.getConnection();
