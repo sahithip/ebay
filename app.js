@@ -212,7 +212,8 @@ app.post('/products/add', authenticate, function (req, res) {
 app.get('/products/update', authenticate, home.editProduct);
 app.post('/products/update', authenticate, home.modifyProduct);
 
-app.get('/list/sellers', home.allSellers);
+app.get('/list/sellers', authenticate, home.allSellers);
+
 app.post('/fromShoppingCart', authenticate , home.fromShoppingCart);
 app.post('/shoppingCart',authenticate,home.shoppingCart);
 app.get('/shoppingCart',authenticate,home.shoppingCart);

@@ -933,10 +933,10 @@ function allSellers(req, res) {
 	mysql.fetchData(function(err, results) {
 		console.log(results);
 		if(req.session.user["UserType"]!= "A"){
-						res.render('activity/list_sellers.ejs',{allCategories:req.session.allCategories,sellers: results});
+						//res.render('activity/list_sellers.ejs',{allCategories:req.session.allCategories,sellers: results});
 					}
 					else{
-						res.render('activity/admin_listsellers.ejs',{allCategories:req.session.allCategories,sellers: results});
+						//res.render('activity/admin_listsellers.ejs',{allCategories:req.session.allCategories,sellers: results});
 					}
 				}, query);
 }

@@ -11,12 +11,20 @@
     <link href="/css/extr.css" type="text/css" rel="stylesheet">
     <link href="/css/logo.css" type="text/css" rel="stylesheet">
     <link href="/css/prof.css" type="text/css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="DataTables-1.10.4/media/css/jquery.dataTables.css">
+  	<script type="text/javascript" charset="utf8" src="DataTables-1.10.4/media/js/jquery.js"></script>
+  	<script type="text/javascript" charset="utf8" src="DataTables-1.10.4/media/js/jquery.dataTables.js"></script>
+    
     <style>
         .my-ebay p.menu-head {
             padding-left: 15px;
         }
         input[type='radio'] {
             vertical-align: text-bottom;
+        }
+        #example_wrapper {
+            float: left;
+            clear: none;
         }
     </style>
 </head>
@@ -140,7 +148,8 @@
     <%if (message) { %>
         <div class="alert alert-<%=mclass%>"><%=message%></div>
         <% } %>
-        <table class="table table-striped table-bordered">
+        <table class="table table-striped table-bordered" id="example"></table>
+        <!--<table class="table table-striped table-bordered">
             <thead>
             <tr>
                 <th>Name</th>
@@ -154,12 +163,13 @@
             </tr>
             </thead>
             <tbody id="main-tbody"></tbody>
-        </table>
+        </table>-->
     </div>
     <script>
         var main = document.getElementById('main-tbody');
         var data = <%-JSON.stringify(products)%>;
         var current_category = 'All';
+        var dTable = null;
         function categoryClick(category){
             console.log(category);
             var curr = document.getElementById(current_category);
@@ -172,16 +182,68 @@
 
         function showProducts(){
             var products = data[current_category] || [];
-            var html = '';
+            
+            /*var html = '';
             for(var i=0; i<products.length; i++){
                 html += productCell(products[i]);
             }
-            main.innerHTML = html;
+            main.innerHTML = html;*/
+            
+            var dataUsed =[];
+            for(var i=0; i<products.length; i++){
+                dataUsed.push(productCell(products[i]));
+            }
+            
+            if(dTable !== null){
+            	dTable.fnClearTable();
+            	if(dataUsed.length > 0){
+            		dTable.fnAddData(dataUsed);
+            		dTable.fnDraw();
+        		}
+            } else {
+	            dTable = $('#example').dataTable( {
+	  				data: dataUsed,
+	  				columnDefs: [
+	  					{type: 'html', targets: 0, title: 'Name'},
+	  					{targets: 1, title: 'Details'},
+	  					{targets: 2, title: 'Condition'},
+	  					{targets: 3, title: 'Category'},
+	  					{targets: 4, title: 'Cost'},
+	  					{targets: 5, title: 'Available Quantity'},
+	  					{targets: 6, title: 'Rating'},
+	  					{type: 'html', targets: 7, title: 'Action'}
+	  				]
+				} );
+            }
+            
         }
 
         function productCell(product){
-        console.log("function executed");
-            var row = "<tr>";
+        	var row = [];
+        	row.push("<a href='/view_product/"+product['ProductName']+"'>" + product['ProductName'] + "</a>");
+        	row.push(product['ProductDetails']);
+        	row.push(product['ProductCondition']);
+        	row.push(product['Category']);
+        	row.push("$"+product['ProductCost']);
+        	row.push(product['AvailableQuantity']);
+        	var rating;
+    		if(product['rating']!=null){
+		     rating = product['rating']
+			   }else{
+      		  rating = 'Not Yet Rated';
+  			  }
+        	row.push(rating);
+        	          var auction = "";
+            if(product['IsAuction'].toLowerCase() === 'y'){
+               auction = "<input type='text' placeholder='bid' name='bid' style='width: 60px; margin-right: 60px;'><button class='btn btn-scnd btn-s' type='submit'>Bid</button>";
+            } else {
+
+            	var maxValue = Number(product['AvailableQuantity']);
+            	auction = "<input type='number' min =1 max="+maxValue+" value='1' name='quantity' style='width: 75px; margin-right: 40px;'><button name='buyorcart' value='cart' class='btn btn-prim btn-s' type='submit'>Add To Cart</button>";
+            };
+        	row.push("<form action='/browse' method='POST'><input type='hidden' name='p' value='" + product['ProductId'] +"'/><input type='hidden' name='pname' value='" + product['ProductName'] + "'/>"+auction+ "<br>Rating: <input type='radio' name='rating' checked value='1'/> 1 "+ "<input type='radio' name='rating' value='2'/> 2 "+"<input type='radio' name='rating' value='3'/> 3 "+"<input type='radio' name='rating' value='4'/> 4 "+ "<input type='radio' name='rating' value='5'/> 5 "+"</form>");
+        	return row;
+            /*var row = "<tr>";
             row += "<td><a href='/view_product/"+product['ProductName']+"'>" + product['ProductName'] + "</td>";
             row += "<td>" + product['ProductDetails'] + "</td>";
             row += "<td>" + product['ProductCondition'] + "</td>";
@@ -210,8 +272,9 @@
             row += "<input type='radio' name='rating' value='3'/> 3 ";
             row += "<input type='radio' name='rating' value='4'/> 4 ";
             row += "<input type='radio' name='rating' value='5'/> 5 ";
-            row += "</form></td></tr>";
-            return row;
+            row += "</form>";//</td></tr>";
+            return row;*/
+            
         }
 
         showProducts();
