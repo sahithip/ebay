@@ -863,11 +863,11 @@ function wonBids(req, res) {
 			+ email
 			+ "' and lower(b.IsAuction) = 'y' and lower(a.BoughtFlag) = 'y'";
 	mysql.fetchData(function(err, results) {
-		console.log(results);
-		/*res.render('activity/bids_won.ejs', {
+		//console.log(results);
+		res.render('activity/bids_won.ejs', {
 			allCategories : req.session.allCategories,
 			bids : results
-		});*/
+		});
 	}, query);
 }
 
@@ -933,10 +933,10 @@ function allSellers(req, res) {
 	mysql.fetchData(function(err, results) {
 		console.log(results);
 		if(req.session.user["UserType"]!= "A"){
-						//res.render('activity/list_sellers.ejs',{allCategories:req.session.allCategories,sellers: results});
+						res.render('activity/list_sellers.ejs',{allCategories:req.session.allCategories,sellers: results});
 					}
 					else{
-						//res.render('activity/admin_listsellers.ejs',{allCategories:req.session.allCategories,sellers: results});
+						res.render('activity/admin_listsellers.ejs',{allCategories:req.session.allCategories,sellers: results});
 					}
 				}, query);
 }
@@ -1388,12 +1388,12 @@ function categoryGroupedListing(req, res) {
 			products['All'].push(results[i]);
 
 		}
-		/*res.render('activity/browse.ejs',{
+		res.render('activity/browse.ejs',{
 			allCategories: req.session.allCategories,
 			products: products,
 			categories: Object.keys(products).sort(),
 			message: req.param('message')
-		});*/
+		});
 	}, query);
 }
 
