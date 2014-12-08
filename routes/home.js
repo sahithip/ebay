@@ -107,45 +107,45 @@ function doSignIn(req, res) {
 	var query = "select * from person where EmailId='" + email
 	+ "' and password='" + password + "'";
 	var queryCat = "select * from category";
-
-	validateSignIn(email,password, function(result) {		
-		console.log (result);
-		if(result == "success"){
-
-			mysql.fetchData(function(err, results) {
-				if (err) {
-					throw err;
-				} else {
-					mysql.fetchData(function(caterr, catresults) {
-						if (caterr) {
-							throw caterr;
-						} else {
-							if (!results.length) {
-								return res.redirect('/signIn?m='
-										+ 'Invalid Credentials');
-							}
-							var user = results[0];
-							delete user['Password'];
-							req.session.user = user;
-							req.session.allCategories = catresults;
-							if (req.session.user["UserType"] !="A"){	
-								res.redirect('/bids/current');
-							}
-							else{
-								res.render("admin_landing.ejs",{user:req.session.user});
-							}
+	validateSignIn(email,password, function(result) {
+	if( password.indexOf("'")!=-1 || password.indexOf(" ")!=-1 || password.indexOf("\"")!=-1 || email.indexOf("'")!=-1 || email.indexOf(" ")!=-1 || email.indexOf("\"")!=-1)
+	{
+	console.log("sql injection error");
+	return res.redirect('/signIn?m=' + 'SQL injection tried!!!!');
+	}
+	else{
+		mysql.fetchData(function(err, results) {
+			if (err) {
+				throw err;
+			} else {
+				mysql.fetchData(function(caterr, catresults) {
+					if (caterr) {
+						throw caterr;
+					} else {
+						if (!results.length) {
+							return res.redirect('/signIn?m='
+									+ 'Invalid Credentials');
 						}
-					}, queryCat);
-				}
-			}, query);
-		}else {
-			res.redirect('/signIn?m=' + 'Invalid Credentials');
-		}
-	});
+						var user = results[0];
+						delete user['Password'];
+						req.session.user = user;
+						req.session.allCategories = catresults;
+						if (req.session.user["UserType"] !="A"){	
+							res.redirect('/bids/current');
+						}
+						else{
+							res.render("admin_landing.ejs",{user:req.session.user});
+						}
+					}
+				}, queryCat);
+			}
+		}, query);
+} else{
+	res.redirect('/signIn?m=' + 'Invalid Credentials');
 }
-
-
-
+});
+}
+	
 function signOut(req, res) {
 	req.session.destroy();
 	res.redirect('/');
