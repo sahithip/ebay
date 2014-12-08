@@ -109,19 +109,21 @@ function doSignIn(req, res) {
 	var queryCat = "select * from category";
 	validateSignIn(email,password, function(result) {
 	if( password.indexOf("'")!=-1 || password.indexOf(" ")!=-1 || password.indexOf("\"")!=-1 || email.indexOf("'")!=-1 || email.indexOf(" ")!=-1 || email.indexOf("\"")!=-1)
-	{
-	console.log("sql injection error");
-	return res.redirect('/signIn?m=' + 'SQL injection tried!!!!');
-	}
+		{
+		console.log("sql injection error");
+		return res.redirect('/signIn?m=' + 'SQL injection tried!!!!');
+		}
 	else{
 		mysql.fetchData(function(err, results) {
 			if (err) {
 				throw err;
-			} else {
+			} 
+			else {
 				mysql.fetchData(function(caterr, catresults) {
 					if (caterr) {
 						throw caterr;
-					} else {
+					}
+					else {
 						if (!results.length) {
 							return res.redirect('/signIn?m='
 									+ 'Invalid Credentials');
@@ -130,19 +132,17 @@ function doSignIn(req, res) {
 						delete user['Password'];
 						req.session.user = user;
 						req.session.allCategories = catresults;
-						if (req.session.user["UserType"] !="A"){	
-							res.redirect('/bids/current');
-						}
-						else{
-							res.render("admin_landing.ejs",{user:req.session.user});
-						}
+							if (req.session.user["UserType"] !="A"){	
+								res.redirect('/bids/current');
+							}
+							else{
+								res.render("admin_landing.ejs",{user:req.session.user});
+							}
 					}
 				}, queryCat);
 			}
 		}, query);
-} else{
-	res.redirect('/signIn?m=' + 'Invalid Credentials');
-}
+	} 
 });
 }
 	
@@ -1136,6 +1136,17 @@ function productAdvancedSearch(req, res) {
 			+ req.param('ProductName') + "%' and ProductCondition like '%"
 			+ req.param('ProductCondition') + "%' and Category like '%"
 			+ req.param('Category') + "%'";
+	
+	var categoryType =req.param('Category');
+	var productCondition = req.param('ProductCondition');
+	
+	if(req.param('Category') == 'Select a category'){	
+		category = '';
+	}
+	
+	if(req.param('ProductCondition') == 'Any'){	
+		productCondition = '';
+	}
 	
 	if (bidsOnly == "Yes") {
 		query = query + "and IsAuction = 'Y' ";

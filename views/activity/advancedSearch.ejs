@@ -76,7 +76,7 @@
                             <td class="gh-td" id="gh-cat-td">
                                 <div id="gh-cat-box">
                                     <select title="Select a category for search" class="gh-sb gh-sprRetina" size="1" id="gh-cat" name="category">
-                                        <option selected="selected" value="all">All Categories</option>
+                                          <option value ="Select a category">Select a category</option>
                                        <%for(var cat =0;cat<allCategories.length;cat++){%>
                                        <option value="<%=allCategories[cat].category%>"><%=allCategories[cat].category%></option>
                                        <%}%>
@@ -215,6 +215,7 @@
                 <label class="control-label col-xs-2">Product Condition : </label>
                   <div class="col-xs-6">
                 <select id="ProductCondition" name="ProductCondition">
+                 <option value ="Any">Any</option>
                 <option value ="New">New </option>
                 <option value ="Used">Used </option>
                 </select>
