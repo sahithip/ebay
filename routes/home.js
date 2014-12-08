@@ -1171,7 +1171,7 @@ function categoryGroupedListing(req, res) {
 	}
 	if (search_query) {
 		search_query = search_query.toLowerCase();
-		var where = "lower(ProductName) like '%" + search_query
+		var where = "lower(	ProductName) like '%" + search_query
 				+ "%' or lower(ProductDetails) like '%" + search_query + "%'";
 		if (category) {
 			where = "(" + where + ") and ";
