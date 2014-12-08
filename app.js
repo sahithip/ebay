@@ -199,7 +199,7 @@ app.post('/products/add', authenticate, function (req, res) {
         if (req.param('IsAuction') == "Y") {
         	var start_time = home.clientDateStringToDateString(req.param('BidStartTime'));
         	var end_time = home.clientDateStringToDateString(req.param('BidEndTime'));
-            home.createProduct(req.session.user.EmailId, req.param('ProductName'), req.param('ProductCondition'), req.param('ProductDetails'), req.param('ProductCost'), req.param('Category'), req.param('AvailableQuantity'), start_time, end_time, req.param('IsAuction'));
+            home.createProduct(req.session.user.EmailId, req.param('ProductName'), req.param('ProductCondition'), req.param('ProductDetails'), req.param('ProductCost'), req.param('Category'),1, start_time, end_time, req.param('IsAuction'));
         }
         else {
             home.createProduct(req.session.user.EmailId, req.param('ProductName'), req.param('ProductCondition'), req.param('ProductDetails'), req.param('ProductCost'), req.param('Category'), req.param('AvailableQuantity'), "NA", "NA", req.param('IsAuction'));

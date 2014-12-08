@@ -118,6 +118,7 @@ function doSignIn(req, res) {
 	var query = "select * from person where EmailId='" + email
 	+ "' and password='" + password + "'";
 	var queryCat = "select * from category";
+	var query1= "update person set LastLogin='" + getDateTime()+  "' where EmailId='"+ email + "'";
 	validateSignIn(email,password, function(result) {
 	if( password.indexOf("'")!=-1 || password.indexOf(" ")!=-1 || password.indexOf("\"")!=-1 || email.indexOf("'")!=-1 || email.indexOf(" ")!=-1 || email.indexOf("\"")!=-1)
 		{
@@ -130,6 +131,11 @@ function doSignIn(req, res) {
 				throw err;
 			} 
 			else {
+				mysql.fetchData(function(quererr,queryresults){
+									if(quererr){
+										throw quererr;
+									} else {
+
 				mysql.fetchData(function(caterr, catresults) {
 					if (caterr) {
 						throw caterr;
@@ -152,7 +158,9 @@ function doSignIn(req, res) {
 					}
 				}, queryCat);
 			}
-		}, query);
+				},query1);
+		}
+			}, query);
 	} 
 });
 }
@@ -554,7 +562,7 @@ function getProducts(callback) {
 
 function updateProduct(updateProduct, updateAttribute, updateValue) {
 	var connection = connect();
-
+	
 	var eQuery = "UPDATE Product SET " + updateAttribute + "='" + updateValue
 			+ "' WHERE ProductName='" + updateProduct + "'";
 
@@ -1361,7 +1369,7 @@ function categoryGroupedListing(req, res) {
 	var category = req.param('category');
 	if(category == "all") category = 0;
 	var time = getDateTime();
-	var query = "select a.ProductId,ProductName,ProductCondition,ProductDetails,ProductCost,Category,AvailableQuantity,BidStartTime,BidEndTime,IsAuction,SellerEmailId,DeletedBySeller,rating from (select * from cmpe273project.product where DeletedBySeller = 'N' and (BidEndTime > '" + time + "' or BidEndTime = 'NA')) a left join (select ProductId, avg(rating) as rating from cmpe273project.productbid group by ProductId) b on a.ProductId = b.ProductId";
+	var query = "select a.ProductId,ProductName,ProductCondition,ProductDetails,ProductCost,Category,AvailableQuantity,BidStartTime,BidEndTime,IsAuction,SellerEmailId,DeletedBySeller,rating from (select * from cmpe273project.product where DeletedBySeller = 'N' and AvailableQuantity > 0 and (BidEndTime > '" + time + "' or BidEndTime = 'NA')) a left join (select ProductId, avg(rating) as rating from cmpe273project.productbid group by ProductId) b on a.ProductId = b.ProductId";
 	if(search_query || category){
 		query += " where ";
 	}
@@ -1494,13 +1502,12 @@ function bidForProduct(req, res) {
 									+ quantity
 									+ " where productid = "
 									+ product_id + ";";
-							query = "insert into productbid (EmailId, ProductId, BidPrice, BoughtFlag, Quantity , Rating) values (";
+							query = "insert into productbid (EmailId, ProductId, BidPrice, BoughtFlag, Quantity , Rating,BidTime) values (";
 							query += "'" + req.session.user.EmailId + "', "
 									+ product_id + ", " + bid + ", '" + bought
 									+ "', " + quantity + " , "
-									+ rating + ")";
-							console.log("query---",query);
-							console.log("query1---",query1);
+									+ rating +  " , '"+ getDateTime()+"')";
+
 							mysql.fetchData(function(err, results){
 				                            mysql.fetchData(function(err,result){
 					                        res.redirect('/browse?message=' + encodeURIComponent('You have placed a bid of ' + bid + ' on ' + product_name));
@@ -1762,8 +1769,10 @@ function getLastRun(callback){
 }
 
 
-function evaluateBids(product_id){
+function evaluateBids(product_id,product_cost){
+
 	var bids_query = "select * from productbid where ProductId=" + product_id;
+
 	mysql.fetchData(function(err, results){
 		if(err){
 			console.log(err);
@@ -1773,15 +1782,41 @@ function evaluateBids(product_id){
 			console.log('No bids for the product with id: ' + product_id);
 			return;
 		}
-		var best_bid = null;
-		var max_bid_price = -1;
+		var best_bid = [];
+		var max_bid_price = product_cost;
+				console.log("max_bid_price",max_bid_price);
 		for(var i=0; i<results.length; i++){
-			if(results[i]['BidPrice'] > max_bid_price){
-				best_bid = results[i];
-				max_bid_price = best_bid['BidPrice'];
+			if(results[i]['BidPrice'] >= max_bid_price){
+				if(results[i]['BidPrice'] > max_bid_price) {
+					best_bid = [];
+					best_bid.push(results[i]);
+				}
+				if(results[i]['BidPrice'] == max_bid_price){
+					best_bid.push(results[i]);
+				}
+				max_bid_price = results[i]['BidPrice'];
 			}
 		}
-		var update_query = "update productbid set BoughtFlag='Y' where ProductId=" + product_id + " and EmailId='" + best_bid['EmailId'] + "' and BidPrice=" + max_bid_price;
+		console.log(best_bid);
+		if(best_bid.length == 0){
+			console.log('No bids for proper price the product with id: ' + product_id);
+			return;
+		}
+		var finalBid = best_bid[0];
+		var bidtime = best_bid[0]['BidTime'];
+		if(best_bid.length >1){
+			for(var i=1; i<best_bid.length; i++){
+				if(best_bid[i]['BidTime']< bidtime){
+					bidtime =best_bid[i]['BidTime'];
+					finalBid = best_bid[i];
+				}
+			}
+			
+		}else if(best_bid.length ==1){
+			finalBid = best_bid[0];
+		}
+		var update_query = "update productbid set BoughtFlag='Y' where ProductId=" + product_id + " and EmailId='" + finalBid['EmailId'] + "' and BidPrice=" + max_bid_price + " and BidTime='" +finalBid['BidTime'] +"'";
+		console.log(update_query);
 		mysql.fetchData(function(err, results){
 			if(err){
 				console.log(err);
@@ -1806,7 +1841,7 @@ function kickOffBidWrapups(){
 				return;
 			}
 			for(var i=0; i<results.length; i++){
-				evaluateBids(results[i]['ProductId']);
+				evaluateBids(results[i]['ProductId'],results[i]['ProductCost']);
 			}
 			setLastRun(time_str);
 		}, ready_products);

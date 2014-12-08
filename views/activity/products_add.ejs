@@ -207,7 +207,7 @@
             <div class="form-group">
                 <label class="control-label col-xs-2">Available Quantity : </label>
                 <div class="col-xs-6">
-                    <input class="form-control" type="text" name="AvailableQuantity" required="true">
+                    <input class="form-control" id = "av1" type="text" name="AvailableQuantity"  required="true">
                 </div>
             </div>
 
@@ -251,7 +251,10 @@ var a = document.getElementById('IsAuction');
 if(a.value == 'N'){
 document.getElementById('t1').disabled = true;
 document.getElementById('t2').disabled = true;
+document.getElementById('av1').disabled = false;
 } else {
+document.getElementById("av1").value =1;
+document.getElementById('av1').disabled = true;
 document.getElementById('t1').disabled = false;
 document.getElementById('t2').disabled = false;
 }
