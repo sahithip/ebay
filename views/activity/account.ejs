@@ -1,5 +1,8 @@
 <html>
 <head>
+
+	<script src="jquery.js" type="text/javascript"></script>
+	<script src="jquery.maskedinput.js" type="text/javascript"></script>
     <title>
         My eBay&nbsp;Summary</title>
     <meta http-equiv="X-UA-Compatible" content="IE=EDGE">
@@ -34,7 +37,7 @@
 		}
 	</script>
 </head>
-<body class="summary-ui  lang-en site-id-0 geo-id-0 time-left-col  sz1200">
+<body  onpageshow ="fmtssn()" class="summary-ui  lang-en site-id-0 geo-id-0 time-left-col  sz1200">
 <!--  Global Header -->
 <div id="header" style="margin-top: 30px; position: relative;">
     <div style="position: absolute; right: 0; top: -20px; font-size: 0.9em">
@@ -163,7 +166,7 @@
             <div class="form-group">
                 <label class="control-label col-xs-2">SSN Number : </label>
                 <div class="col-xs-6">
-                    <input class="form-control" type="text" id="SSNNumber" name="SSNNumber" oninput ="fmtssn()" disabled value="<%=user.MembershipNo%>">
+                    <input class="form-control" type="text" id="SSNNumber" name="SSNNumber"  disabled value="<%=user.MembershipNo%>">
                 </div>
             </div>
 
