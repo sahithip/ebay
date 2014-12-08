@@ -105,35 +105,46 @@ function doSignIn(req, res) {
 	var email = req.param("inputEmail");
 	var password = req.param("inputPassword");
 	var query = "select * from person where EmailId='" + email
-			+ "' and password='" + password + "'";
+	+ "' and password='" + password + "'";
 	var queryCat = "select * from category";
-	mysql.fetchData(function(err, results) {
-		if (err) {
-			throw err;
-		} else {
-			mysql.fetchData(function(caterr, catresults) {
-				if (caterr) {
-					throw caterr;
+
+	validateSignIn(email,password, function(result) {		
+		console.log (result);
+		if(result == "success"){
+
+			mysql.fetchData(function(err, results) {
+				if (err) {
+					throw err;
 				} else {
-					if (!results.length) {
-						return res.redirect('/signIn?m='
-								+ 'Invalid Credentials');
-					}
-					var user = results[0];
-					delete user['Password'];
-					req.session.user = user;
-					req.session.allCategories = catresults;
-					if (req.session.user["UserType"] !="A"){	
-						res.redirect('/bids/current');
-					}
-					else{
-						res.render("admin_landing.ejs",{user:req.session.user});
-					}
+					mysql.fetchData(function(caterr, catresults) {
+						if (caterr) {
+							throw caterr;
+						} else {
+							if (!results.length) {
+								return res.redirect('/signIn?m='
+										+ 'Invalid Credentials');
+							}
+							var user = results[0];
+							delete user['Password'];
+							req.session.user = user;
+							req.session.allCategories = catresults;
+							if (req.session.user["UserType"] !="A"){	
+								res.redirect('/bids/current');
+							}
+							else{
+								res.render("admin_landing.ejs",{user:req.session.user});
+							}
+						}
+					}, queryCat);
 				}
-			}, queryCat);
+			}, query);
+		}else {
+			res.redirect('/signIn?m=' + 'Invalid Credentials');
 		}
-	}, query);
+	});
 }
+
+
 
 function signOut(req, res) {
 	req.session.destroy();
@@ -892,55 +903,64 @@ function updateUser(req, res) {
 	var selection = req.param('updateordelete');
 
 	if (selection == 'update') {
-		var query = "update person set FirstName='" + req.param('FirstName')
+
+		validateUpdateUser(req.param("FirstName") ,req.param("LastName"), req.param("State"), req.param("Zipcode"), function(result){
+			if(result == "success"){		
+				var query = "update person set FirstName='" + req.param('FirstName')
 				+ "', LastName='" + req.param('LastName') + "', ";
-		query += "Address='" + req.param('Address') + "', City='"
+				query += "Address='" + req.param('Address') + "', City='"
 				+ req.param('City') + "', State='" + req.param('State')
 				+ "', ZipCode=" + req.param('ZipCode');
-		query += " where EmailId='" + req.session.user.EmailId + "'";
-		var afterUpdateDetails = "select * from person where EmailId='"
-				+ req.session.user.EmailId + "'";
-		var mclass, message;
-		mysql.fetchData(function(err, results) {
+				query += " where EmailId='" + req.session.user.EmailId + "'";
+				var afterUpdateDetails = "select * from person where EmailId='"
+					+ req.session.user.EmailId + "'";
+				var mclass, message;
+				mysql.fetchData(function(err, results) {
 
-			if (err) {
-				mclass = 'danger';
-				message = 'Invalid form data';
-			} else {
-				mclass = 'info';
-				message = 'Successfully updated!';
-				mysql.fetchData(function(err1, results1) {
-					if (err1) {
-						console.log(err1);
+					if (err) {
 						mclass = 'danger';
 						message = 'Invalid form data';
 					} else {
 						mclass = 'info';
 						message = 'Successfully updated!';
-						var user = results1[0];
-						console.log(user);
-						delete user['Password'];
+						mysql.fetchData(function(err1, results1) {
+							if (err1) {
+								console.log(err1);
+								mclass = 'danger';
+								message = 'Invalid form data';
+							} else {
+								mclass = 'info';
+								message = 'Successfully updated!';
+								var user = results1[0];
+								console.log(user);
+								delete user['Password'];
 
-						req.session.user = user;
-						res.render('activity/account.ejs', {
-							user : req.session.user,
-							allCategories : req.session.allCategories,
-							mclass : mclass,
-							message : message
-						});
+								req.session.user = user;
+								res.render('activity/account.ejs', {
+									user : req.session.user,
+									allCategories : req.session.allCategories,
+									mclass : mclass,
+									message : message
+								});
+							}
+						}, afterUpdateDetails);
+
 					}
-				}, afterUpdateDetails);
 
+				}, query);
+			}else {
+				mclass = 'danger';
+				message = 'Invalid form data';
+				res.render('activity/account.ejs', {mclass: mclass, message: message});
 			}
-
-		}, query);
+		});
 	} else {
 		var delPerson = "delete from person where EmailId='"
-				+ req.session.user.EmailId + "'";
+			+ req.session.user.EmailId + "'";
 		var delProductBid = "delete from productbid where EmailId='"
-				+ req.session.user.EmailId + "'";
+			+ req.session.user.EmailId + "'";
 		var flagProduct = "update product set DeletedBySeller='Y' where SellerEmailId='"
-				+ req.session.user.EmailId + "'";
+			+ req.session.user.EmailId + "'";
 		mysql.fetchData(function(err1, results1) {
 
 			if (err1) {
@@ -970,6 +990,90 @@ function updateUser(req, res) {
 	}
 
 }
+function validateSignIn (userName , password, callback){
+	if(userName == ""){
+		callback("fail");
+	}else if(password == ""){
+		callback("fail");
+	}else
+		callback("success");
+}
+
+
+function validateSignUp(password, fname, lname, email , state, zipCode, callback){
+	var indexOfAt = email.indexOf('@');
+	var indexOfLastDot = email.lastIndexOf('.');
+	if((fname == "") || (lname == "")){
+		console.log("FirstName and LastName should not be null");
+		callback("fail");
+	}else if(!fname.matches("^[A-Za-z]+$") || !lname.matches("^[A-Za-z]+$") || !state.matches("^[A-Za-z]+$")){
+		console.log("FirstName and LastName should contain only Alphabets");
+		callback("fail");
+	}
+	else if(fname.length() < 2 || fname.length() > 30 || lname.length() < 2 || lname.length() > 30){
+		console.log("Name should between 2 to 30 characters only")
+		callback("fail");
+	}
+	else if(!zipCode.matches("\d{5}([\-]\d{4})?")){
+		console.log("Invalid ZipCode");
+		callback("fail");
+	}
+	else if(email == ""){
+		console.log("Email should not be null");
+		callback("fail");
+	}
+	else if (indexOfAt < 0) { 
+		console.log("Invalid emailid");
+		callback("fail");
+	}
+	// second check :
+	else if (indexOfAt < 2) {
+		console.log ("Invalid emailid");
+		callback("fail");
+	}
+	// third check :
+	else if (indexOfLastDot < indexOfAt || indexOfLastDot != (email.length() - 4)) {
+		console.log( "Invalid emailid");
+		callback("fail");
+	}
+	else if (validateIdnPassword(email,password,function(result){
+
+		if(result == "fail"){
+			console.log("email or Password must not be empty");
+			callback("fail");
+		}else if(password.length() < 8 || password.length() > 30){
+			console.log("Password must be min 8 characters and max 30 characters");
+			callback("fail");
+		}
+	})){
+
+	}else {
+		callback("success");
+	}
+}
+
+function validateUpdateUser(fname, lname, state, zipCode, callback){
+	
+	if((fname == "") || (lname == "")){
+		console.log("FirstName and LastName should not be null");
+		callback("fail");
+	}else if(!fname.matches("^[A-Za-z]+$") || !lname.matches("^[A-Za-z]+$") || !state.matches("^[A-Za-z]+$")){
+		console.log("FirstName and LastName should contain only Alphabets");
+		callback("fail");
+	}
+	else if(fname.length() < 2 || fname.length() > 30 || lname.length() < 2 || lname.length() > 30){
+		console.log("Name should between 2 to 30 characters only")
+		callback("fail");
+	}
+	else if(!zipCode.matches("\d{5}([\-]\d{4})?")){
+		console.log("Invalid ZipCode");
+		callback("fail");
+	}
+	else {
+		callback("success");
+	}
+}
+
 function advancedSearch(req, res) {
 	var message = "";
 	var query = "select * from category";
